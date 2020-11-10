@@ -375,7 +375,10 @@ namespace modeling_demos
 
             //Get the customer
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
-            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(id: customerId, partitionKey: new PartitionKey(customerId));
+            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
+                id: customerId, 
+                partitionKey: new PartitionKey(customerId)
+                );
             CustomerV4 customer = response.Resource;
 
             //Increment the salesOrderTotal property
@@ -432,7 +435,10 @@ namespace modeling_demos
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
             string orderId = "5350ce31-ea50-4df9-9a48-faff97675ac5";
 
-            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(id: customerId, partitionKey: new PartitionKey(customerId));
+            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
+                id: customerId, 
+                partitionKey: new PartitionKey(customerId)
+            );
             CustomerV4 customer = response.Resource;
 
             //Decrement the salesOrderTotal property
