@@ -229,10 +229,14 @@ namespace modeling_demos
             string categoryId = "86F3CBAB-97A7-4D01-BABB-ADEFFFAED6B4";
             
             //Query for this category. How many products?
-            string sql = "SELECT COUNT(1) AS ProductCount, c.categoryName FROM c WHERE c.categoryId = '86F3CBAB-97A7-4D01-BABB-ADEFFFAED6B4' GROUP BY c.categoryName";
+            string sql = "SELECT COUNT(1) AS ProductCount, c.categoryName " +
+                "FROM c WHERE c.categoryId = '86F3CBAB-97A7-4D01-BABB-ADEFFFAED6B4' " +
+                "GROUP BY c.categoryName";
 
             FeedIterator<dynamic> resultSet = container.GetItemQueryIterator<dynamic>(
-                new QueryDefinition(sql), requestOptions: new QueryRequestOptions{ PartitionKey = new PartitionKey(categoryId)});
+                new QueryDefinition(sql), 
+                requestOptions: new QueryRequestOptions{ 
+                    PartitionKey = new PartitionKey(categoryId)});
 
             Console.WriteLine("Print out category name and number of products in that category\n");
             while (resultSet.HasMoreResults)
@@ -307,7 +311,10 @@ namespace modeling_demos
             FeedIterator<SalesOrder> resultSet = container.GetItemQueryIterator<SalesOrder>(
                 new QueryDefinition(sql)
                 .WithParameter("@customerId", customerId),
-                requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(customerId) });
+                requestOptions: new QueryRequestOptions 
+                { 
+                    PartitionKey = new PartitionKey(customerId) 
+                });
 
             Console.WriteLine("Print out orders for this customer\n");
             while (resultSet.HasMoreResults)
@@ -335,13 +342,17 @@ namespace modeling_demos
             FeedIterator<dynamic> resultSet = container.GetItemQueryIterator<dynamic>(
                 new QueryDefinition(sql)
                 .WithParameter("@customerId", customerId),
-                requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(customerId) });
+                requestOptions: new QueryRequestOptions 
+                { 
+                    PartitionKey = new PartitionKey(customerId) 
+                });
 
             CustomerV4 customer = new CustomerV4();
             List<SalesOrder> orders = new List<SalesOrder>();
 
             while (resultSet.HasMoreResults)
             {
+                //dynamic response. Deserialize into POCO's based upon "type" property
                 FeedResponse<dynamic> response = await resultSet.ReadNextAsync();
                 foreach (var item in response)
                 {
@@ -375,7 +386,10 @@ namespace modeling_demos
 
             //Get the customer
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
-            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(id: customerId, partitionKey: new PartitionKey(customerId));
+            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
+                id: customerId, 
+                partitionKey: new PartitionKey(customerId)
+                );
             CustomerV4 customer = response.Resource;
 
             //Increment the salesOrderTotal property
@@ -432,7 +446,10 @@ namespace modeling_demos
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
             string orderId = "5350ce31-ea50-4df9-9a48-faff97675ac5";
 
-            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(id: customerId, partitionKey: new PartitionKey(customerId));
+            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
+                id: customerId, 
+                partitionKey: new PartitionKey(customerId)
+            );
             CustomerV4 customer = response.Resource;
 
             //Decrement the salesOrderTotal property
@@ -458,9 +475,12 @@ namespace modeling_demos
             Container container = database.GetContainer("customer");
 
             //Query to get our top 10 customers 
-            string sql = "SELECT TOP 10 c.firstName, c.lastName, c.salesOrderCount FROM c WHERE c.type = 'customer' ORDER BY c.salesOrderCount DESC";
+            string sql = "SELECT TOP 10 c.firstName, c.lastName, c.salesOrderCount " +
+                "FROM c WHERE c.type = 'customer' " +
+                "ORDER BY c.salesOrderCount DESC";
 
-            FeedIterator<dynamic> resultSet = container.GetItemQueryIterator<dynamic>(new QueryDefinition(sql));
+            FeedIterator<dynamic> resultSet = container.GetItemQueryIterator<dynamic>(
+                new QueryDefinition(sql));
 
             Console.WriteLine("Print out top 10 customers and number of orders\n");
             double ru = 0;
