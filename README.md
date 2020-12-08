@@ -8,6 +8,8 @@ This repo contains a Visual Studio solution with three projects in it:
 
 * **change-feed-categories**: This project uses change feed processor to monitor the product categories container for changes and then propagates those to the products container.
 
+* **change-feed-category-sales**: This project uses change feed processor to maintain a materialized view aggregate of total sales for each product category by monitoring the customer container for new orders and then updating the salesByCategory container with the new sales totals.
+
 * **models**: This project contains all of the POCO classes used in both other projects.
 
 ## Source data
@@ -28,8 +30,7 @@ You can also [download a bak file](https://github.com/AzureCosmosDB/CosmicWorks/
 ## Provision the four versions of the Cosmos databases
 
 To create a new Cosmos DB account with four databases and containers for each from this button below. The four databases are set up with autoscale throughput. 
-To improve the performance of the import process you may want to increase the throughput, then reduce it back to 4000 RU/s. Note that the data in blob storage is located in West US 2. 
-If you create the Cosmos DB account in this region you will get better performance and latency when bulk loading the data.
+To improve the performance of the import process you may want to increase the throughput to approx. 40,000 RU/s, then reduce it back to 4000 RU/s. Note that the data in blob storage is located in West US 2. If you provision your Cosmos account in another region it will slow load times and also incur egress charges however these will be small.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazurecosmosdb%2Fcosmicworks%2Fmaster%2Fazuredeploy.json)
 

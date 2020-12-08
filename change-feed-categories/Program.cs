@@ -13,23 +13,21 @@ namespace ChangeFeedConsole
         private static IConfigurationRoot config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();
-        private static readonly string _endpointUri = config["endpointUri"];
-        private static readonly string _primaryKey = config["primaryKey"];
-        private static readonly string _databaseId = "database-v3";
-        private static readonly string _containerId = "productCategory";
-        private static readonly string _destinationContainerId = "product";
-        private static CosmosClient _client = new CosmosClient(_endpointUri, _primaryKey);
+        private static readonly string uri = config["endpointUri"];
+        private static readonly string key = config["primaryKey"];
+        
+        private static readonly CosmosClient _client = new CosmosClient(uri, key);
+        private static readonly Database database = _client.GetDatabase("database-v3");
+        private static readonly Container productCategoryContainer = database.GetContainer("productCategory");
+        private static readonly Container productContainer = database.GetContainer("product");
 
         static async Task Main(string[] args)
         {
-            Database database = _client.GetDatabase(_databaseId);
-            Container container = database.GetContainer(_containerId);
-            Container destinationContainer = database.GetContainer(_destinationContainerId);
-
+            
             ContainerProperties leaseContainerProperties = new ContainerProperties("consoleLeases", "/id");
             Container leaseContainer = await database.CreateContainerIfNotExistsAsync(leaseContainerProperties, throughput: 400);
 
-            var builder = container.GetChangeFeedProcessorBuilder("ProductCategoryProcessor",
+            var builder = productCategoryContainer.GetChangeFeedProcessorBuilder("ProductCategoryProcessor",
                 async (IReadOnlyCollection<ProductCategory> input, CancellationToken cancellationToken) => 
                 {
                     Console.WriteLine(input.Count + " Change(s) Received");
@@ -42,14 +40,14 @@ namespace ChangeFeedConsole
                         string categoryId = item.id;
                         string categoryName = item.name;
 
-                        await UpdateProductCategoryName(destinationContainer, categoryId, categoryName);
+                        tasks.Add(UpdateProductCategoryName(categoryId, categoryName));
                     }
 
                     await Task.WhenAll(tasks);
                 });
 
             var processor = builder
-                .WithInstanceName("changeFeedProductCategories")
+                .WithInstanceName("ChangeFeedProductCategories")
                 .WithLeaseContainer(leaseContainer)
                 .Build();
 
@@ -64,12 +62,17 @@ namespace ChangeFeedConsole
             await processor.StopAsync();
         }
 
-        private static async Task UpdateProductCategoryName(Container destinationcontainer, string categoryId, string categoryName)
+        private static async Task UpdateProductCategoryName(string categoryId, string categoryName)
         {
+            //query all products for the category
             string sql = $"SELECT * FROM c WHERE c.categoryId = '{categoryId}'";
 
-            FeedIterator<Product> resultSet = destinationcontainer.GetItemQueryIterator<Product>(
-                new QueryDefinition(sql), requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(categoryId) });
+            FeedIterator<Product> resultSet = productContainer.GetItemQueryIterator<Product>(
+                new QueryDefinition(sql), 
+                requestOptions: new QueryRequestOptions 
+                { 
+                    PartitionKey = new PartitionKey(categoryId) 
+                });
 
             int productCount = 0;
 
@@ -85,8 +88,8 @@ namespace ChangeFeedConsole
                     //update category name for product
                     product.categoryName = categoryName;
                     
-                    //update product
-                    await destinationcontainer.ReplaceItemAsync(
+                    //write the update back to product container
+                    await productContainer.ReplaceItemAsync(
                         partitionKey: new PartitionKey(categoryId),
                         id: product.id,
                         item: product);
