@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
@@ -10,12 +11,19 @@ namespace ChangeFeedConsole
 {
     class Program
     {
-        private static IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
+        //=================================================================
+        //Load secrets
+        private static IConfigurationBuilder builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddUserSecrets<Secrets>();
+
+        private static IConfigurationRoot config = builder.Build();
+
         private static readonly string uri = config["endpointUri"];
         private static readonly string key = config["primaryKey"];
-        
+        private static readonly CosmosClient client = new CosmosClient(uri, key);
+
         private static readonly CosmosClient _client = new CosmosClient(uri, key);
         private static readonly Database database = _client.GetDatabase("database-v3");
         private static readonly Container productCategoryContainer = database.GetContainer("productCategory");
@@ -98,5 +106,11 @@ namespace ChangeFeedConsole
                 Console.WriteLine($"Updated {productCount} products with updated category name '{categoryName}'");
             }
         }
+    }
+
+    class Secrets
+    {
+        public string endpointUri;
+        public string primaryKey;
     }
 }
