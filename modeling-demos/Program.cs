@@ -6,14 +6,21 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using models;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace modeling_demos
 {
     class Program
     {
-        private static IConfigurationRoot config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
+        //=================================================================
+        //Load secrets
+        private static IConfigurationBuilder builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddUserSecrets<Secrets>();
+
+        private static IConfigurationRoot config = builder.Build();
+
         private static readonly string uri = config["endpointUri"];
         private static readonly string key = config["primaryKey"];
         private static readonly CosmosClient client = new CosmosClient(uri, key);
@@ -36,9 +43,6 @@ namespace modeling_demos
                 Console.WriteLine($"[h]   Create new order and update order total");
                 Console.WriteLine($"[i]   Delete order and update order total");
                 Console.WriteLine($"[j]   Query top 10 customers");
-                Console.WriteLine($"[k]   Query sales by category");
-                Console.WriteLine($"[l]   Create huge Mountain Bike Order");
-                Console.WriteLine($"[m]   Delete huge Mountain Bike Order");
                 Console.WriteLine($"[x]   Exit");
 
                 ConsoleKeyInfo result = Console.ReadKey(true);
@@ -95,21 +99,6 @@ namespace modeling_demos
                 {
                     Console.Clear();
                     await GetTop10Customers();
-                }
-                else if (result.KeyChar == 'k')
-                {
-                    Console.Clear();
-                    await QuerySalesByCategory();
-                }
-                else if (result.KeyChar == 'l')
-                {
-                    Console.Clear();
-                    await CreateHugeMountainBikeOrder();
-                }
-                else if (result.KeyChar == 'm')
-                {
-                    Console.Clear();
-                    await DeleteHugeMountainBikeOrder();
                 }
                 else if (result.KeyChar == 'x')
                 {
@@ -517,125 +506,15 @@ namespace modeling_demos
             Console.ReadKey();
         }
 
-        public static async Task QuerySalesByCategory()
-        {
-            Database database = client.GetDatabase("database-v4");
-            Container container = database.GetContainer("salesByCategory");
-
-            //Query to get our top 10 customers 
-            string sql = "SELECT c.categoryName, c.totalSales FROM c ORDER BY c.totalSales DESC";
-
-            FeedIterator<CategorySales> resultSet = container.GetItemQueryIterator<CategorySales>(
-                new QueryDefinition(sql));
-
-            Console.WriteLine("Print out sales per category\n");
-
-            while (resultSet.HasMoreResults)
-            {
-                FeedResponse<CategorySales> response = await resultSet.ReadNextAsync();
-                foreach (CategorySales item in response)
-                {
-                    Console.WriteLine($"Category: {item.categoryName} \tTotal Sales: {item.totalSales}");
-                }
-            }
-
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
-        }
-
-        public static async Task CreateHugeMountainBikeOrder()
-        {
-            Database database = client.GetDatabase("database-v4");
-            Container container = database.GetContainer("customer");
-
-            //Get the customer
-            string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
-            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
-                id: customerId,
-                partitionKey: new PartitionKey(customerId)
-                );
-            CustomerV4 customer = response.Resource;
-
-            //Increment the salesOrderTotal property
-            customer.salesOrderCount++;
-
-            //Create a new order
-            string orderId = "f571e271-c98e-44d1-bb6c-47ad353c4ebc";
-
-            SalesOrder salesOrder = new SalesOrder
-            {
-                id = orderId,
-                type = "salesOrder",
-                customerId = customer.id,
-                orderDate = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                shipDate = "",
-                details = new List<SalesOrderDetails>
-                {
-                    new SalesOrderDetails
-                    {
-                        sku = "BK-M82S-44",
-                        name = "Mountain-100 Silver, 44",
-                        price = 3399.99,
-                        quantity = 170
-                    }
-                }
-            };
-
-            //Submit both as a transactional batch
-            TransactionalBatchResponse txBatchResponse = await container.CreateTransactionalBatch(
-                new PartitionKey(salesOrder.customerId))
-                .CreateItem<SalesOrder>(salesOrder)
-                .ReplaceItem<CustomerV4>(customer.id, customer)
-                .ExecuteAsync();
-
-            if (txBatchResponse.IsSuccessStatusCode)
-                Console.WriteLine("Order created successfully");
-
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
-            
-        }
-
-        private static async Task DeleteHugeMountainBikeOrder()
-        {
-            Database database = client.GetDatabase("database-v4");
-            Container container = database.GetContainer("customer");
-            Container container2 = database.GetContainer("salesByCategory");
-
-            string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
-            string orderId = "f571e271-c98e-44d1-bb6c-47ad353c4ebc";
-            string categoryId = "56400CF3-446D-4C3F-B9B2-68286DA3BB99";
-
-            ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
-                id: customerId,
-                partitionKey: new PartitionKey(customerId)
-            );
-            CustomerV4 customer = response.Resource;
-
-            //Decrement the salesOrderTotal property
-            customer.salesOrderCount--;
-
-            //Submit both as a transactional batch
-            TransactionalBatchResponse txBatchResponse = await container.CreateTransactionalBatch(
-                new PartitionKey(customerId))
-                .DeleteItem(orderId)
-                .ReplaceItem<CustomerV4>(customer.id, customer)
-                .ExecuteAsync();
-
-            //revert category sales to original value (normally this would be done with a soft delete or some other means)
-            ItemResponse<CategorySales> response1 = await container2.ReadItemAsync<CategorySales>(categoryId, new PartitionKey(categoryId));
-            CategorySales categorySales = response1.Resource;
-
-            categorySales.totalSales = 11788915;
-
-            await container2.ReplaceItemAsync(categorySales, categoryId, new PartitionKey(categoryId));
-        }
-
         public static void Print(object obj)
         {
             Console.WriteLine($"{JObject.FromObject(obj).ToString()}\n");
         }
     }
 
-
+    class Secrets
+    {
+        public string endpointUri;
+        public string primaryKey;
+    }
 }

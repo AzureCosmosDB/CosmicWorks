@@ -2,13 +2,12 @@
 
 How to migrate a relational data model to Azure Cosmos DB, a distributed, horizontally scalable, NoSQL database.
 
-This repo contains a Visual Studio solution with three projects in it:
+This repo is used to support a presentation on how to migrate a relational database schema to a NoSQL database like Azure Cosmos DB. 
+This repo contains a Powerpoint presetnation and a Visual Studio solution that represents the demos for this presenation with three projects in it:
 
 * **modeling-demos**: This contains the main app that shows the evolution of the data models from v1 to v4
 
 * **change-feed-categories**: This project uses change feed processor to monitor the product categories container for changes and then propagates those to the products container.
-
-* **change-feed-category-sales**: This project uses change feed processor to maintain a materialized view aggregate of total sales for each product category by monitoring the customer container for new orders and then updating the salesByCategory container with the new sales totals.
 
 * **models**: This project contains all of the POCO classes used in both other projects.
 
