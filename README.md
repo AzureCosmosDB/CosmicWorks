@@ -28,8 +28,9 @@ You can also [download a bak file](https://github.com/AzureCosmosDB/CosmicWorks/
 
 ## Provision the four versions of the Cosmos databases
 
-To create a new Cosmos DB account with four databases and containers for each from this button below. The four databases are set up with autoscale throughput. 
-To improve the performance of the import process you may want to increase the throughput to approx. 40,000 RU/s, then reduce it back to 4000 RU/s. Note that the data in blob storage is located in West US 2. If you provision your Cosmos account in another region it will slow load times and also incur egress charges however these will be small.
+To create a new Cosmos DB account with four databases and containers for each from this button below. This template provisions each container with autoscale with 4000 max throughput. 
+To improve the performance of the import process you may want to increase the throughput to approx. 40,000 RU/s, then reduce it back to 4000 RU/s. To save on cost you can modify the ARM template to
+provision throughput at the database level rather than for each container.
 
 [![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fazurecosmosdb%2Fcosmicworks%2Fmaster%2Fazuredeploy.json)
 
