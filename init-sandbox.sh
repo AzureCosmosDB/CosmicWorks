@@ -23,7 +23,7 @@ key=$(az deployment group show \
     --query "properties.outputs.key.value" \
     --output tsv)
 
-key+=';'
+#key+=';'
 
 #delete appSettings.json
 rm -f "appSettings.json"

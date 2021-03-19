@@ -16,13 +16,13 @@ namespace modeling_demos
         //Load secrets
         private static IConfigurationBuilder builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("./appSettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile("../appSettings.json", optional: false, reloadOnChange: true)
             .AddUserSecrets<Secrets>();
 
         private static IConfigurationRoot config = builder.Build();
 
-        private static readonly string uri = config["endpointUri"];
-        private static readonly string key = config["primaryKey"];
+        private static readonly string uri = config["uri"];
+        private static readonly string key = config["key"];
         private static readonly CosmosClient client = new CosmosClient(uri, key);
 
         public static async Task Main(string[] args)
@@ -514,7 +514,7 @@ namespace modeling_demos
 
     class Secrets
     {
-        public string endpointUri;
-        public string primaryKey;
+        public string uri;
+        public string key;
     }
 }
