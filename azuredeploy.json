@@ -59,10 +59,7 @@
                 "resource": {
                     "id": "database-v1"
                 },
-                "options": {
-                    "autoscaleSettings": {
-                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
-                }
+                "options": {}
             }
         },
         {
@@ -76,10 +73,7 @@
                 "resource": {
                     "id": "database-v2"
                 },
-                "options": {
-                    "autoscaleSettings": {
-                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
-                }
+                "options": {}
             }
         },
         {
@@ -93,10 +87,7 @@
                 "resource": {
                     "id": "database-v3"
                 },
-                "options": {
-                    "autoscaleSettings": {
-                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
-                }
+                "options": {}
             }
         },
         {
@@ -110,10 +101,7 @@
                 "resource": {
                     "id": "database-v4"
                 },
-                "options": {
-                    "autoscaleSettings": {
-                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
-                }
+                "options": {}
             }
         },
         {
@@ -134,7 +122,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -155,7 +146,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -176,7 +170,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -197,7 +194,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -218,7 +218,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -239,7 +242,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -260,7 +266,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -281,7 +290,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -302,9 +314,12 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
-        }
+        },
         {
             "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
             "apiVersion": "2021-01-15",
@@ -323,7 +338,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -344,7 +362,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -365,7 +386,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -386,7 +410,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -407,7 +434,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -428,7 +458,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -449,7 +482,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -470,7 +506,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
                 {
@@ -491,7 +530,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -512,7 +554,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -533,7 +578,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -554,7 +602,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -575,7 +626,10 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         },
         {
@@ -596,8 +650,21 @@
                         "kind": "Hash"
                     }
                 },
-                "options": {}
+                "options": {
+                    "autoscaleSettings": {
+                        "maxThroughput": "[parameters('autoscaleMaxThroughput')]" }
+                }
             }
         }
-    ]
+    ],
+    "outputs": {
+        "uri": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.DocumentDb/databaseAccounts/', parameters('accountName'))).documentEndpoint]"
+        },
+        "key": {
+            "type": "string",
+            "value": "[listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('accountName')), '2021-01-15').primaryMasterKey]"
+        }
+    }
 }
