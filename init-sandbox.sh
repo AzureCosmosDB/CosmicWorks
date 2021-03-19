@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Only for use for provisioning resources in an Azure subscription with one resource group
+
 resourceGroupName=$(az group list --query "[0].name" -o tsv)
 #resourceGroupName='mjbCosmicLabSandboxTest'
 deploymentName="CosmicLab-$RANDOM"
@@ -33,7 +35,7 @@ appSettings=$(cat << EOF
 }
 EOF
 )
-echo "$appSettings" > "appSetting.json"
+echo "$appSettings" > "appSettings.json"
 
 echo "Resource Group Name" $resourceGroupName
 echo "Deployment Name" $deploymentName
