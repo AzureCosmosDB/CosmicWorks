@@ -15,13 +15,13 @@ namespace ChangeFeedConsole
         //Load secrets
         private static IConfigurationBuilder builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile(@"..\appSettings.json", optional: false, reloadOnChange: true)
             .AddUserSecrets<Secrets>();
 
         private static IConfigurationRoot config = builder.Build();
 
-        private static readonly string uri = config["endpointUri"];
-        private static readonly string key = config["primaryKey"];
+        private static readonly string uri = config["uri"];
+        private static readonly string key = config["key"];
         private static readonly CosmosClient client = new CosmosClient(uri, key);
 
         private static readonly CosmosClient _client = new CosmosClient(uri, key);
@@ -110,7 +110,7 @@ namespace ChangeFeedConsole
 
     class Secrets
     {
-        public string endpointUri;
-        public string primaryKey;
+        public string uri;
+        public string key;
     }
 }
