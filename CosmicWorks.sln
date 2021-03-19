@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9EDC2DA7-DD5F-4D6D-A058-C25CAC8A3964}"
 	ProjectSection(SolutionItems) = preProject
 		azuredeploy.json = azuredeploy.json
+		config.json = config.json
 		init-sandbox.sh = init-sandbox.sh
 		README.md = README.md
 	EndProjectSection
