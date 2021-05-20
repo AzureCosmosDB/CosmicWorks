@@ -1,10 +1,7 @@
 #!/bin/bash
 
-#Only for use for provisioning resources in an Azure subscription with one resource group
-
-resourceGroupName=$(az group list --query "[0].name" -o tsv)
-#resourceGroupName='mjbCosmicLabSandboxTest'
-deploymentName="CosmicLab-$RANDOM"
+deploymentName="CosmicWorks-$RANDOM"
+ResourceGroupName=$deploymentName
 
 az deployment group create \
     --resource-group $resourceGroupName \
@@ -23,9 +20,6 @@ key=$(az deployment group show \
     --query "properties.outputs.key.value" \
     --output tsv)
 
-#key+=';'
-
-#delete appSettings.json
 rm -f "appSettings.json"
 
 appSettings=$(cat << EOF 
