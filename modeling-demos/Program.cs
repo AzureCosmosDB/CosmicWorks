@@ -24,6 +24,7 @@ namespace modeling_demos
 
         private static readonly string uri = config["uri"];
         private static readonly string key = config["key"];
+
         private static readonly CosmosClient client = new CosmosClient(uri, key);
 
         public static async Task Main(string[] args)
@@ -44,6 +45,11 @@ namespace modeling_demos
                 Console.WriteLine($"[h]   Create new order and update order total");
                 Console.WriteLine($"[i]   Delete order and update order total");
                 Console.WriteLine($"[j]   Query top 10 customers");
+                Console.WriteLine($"-------------------------------------------");
+                Console.WriteLine($"[k]   Create databases and containers");
+                Console.WriteLine($"[l]   Upload data to containers");
+                Console.WriteLine($"[m]   Delete databases and containers");
+                Console.WriteLine($"-------------------------------------------");
                 Console.WriteLine($"[x]   Exit");
 
                 ConsoleKeyInfo result = Console.ReadKey(true);
@@ -100,6 +106,26 @@ namespace modeling_demos
                 {
                     Console.Clear();
                     await GetTop10Customers();
+                }
+                else if (result.KeyChar == 'k')
+                {
+                    // Create databases and containers
+                    await Deployment.CreateDatabase(client);
+                    Console.Clear();
+                    
+                }
+                else if (result.KeyChar == 'l')
+                {
+                    //Upload data to containers
+                    await Deployment.LoadDatabase(client);
+                    Console.Clear();
+                }
+                else if (result.KeyChar == 'm')
+                {
+                    //Delete databases and containers
+                    await Deployment.DeleteDatabase(client);
+                    Console.Clear();
+              
                 }
                 else if (result.KeyChar == 'x')
                 {
@@ -515,7 +541,7 @@ namespace modeling_demos
 
     class Secrets
     {
-        public string uri;
-        public string key;
+        public string uri="";
+        public string key="";
     }
 }
