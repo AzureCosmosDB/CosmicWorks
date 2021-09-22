@@ -15,15 +15,6 @@
             "metadata": {
                 "description": "Location for the Cosmos DB account."
             }
-        },
-        "autoscaleMaxThroughput": {
-            "type": "int",
-            "defaultValue": 4000,
-            "minValue": 4000,
-            "maxValue": 1000000,
-            "metadata": {
-                "description": "Maximum throughput when using Autoscale Throughput Policy for the database"
-            }
         }
     },
     "variables": {},
