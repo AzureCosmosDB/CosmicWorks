@@ -108,7 +108,7 @@ namespace modeling_demos
             }
         }
 
-            public static async Task CreateDatabaseAndContainers(CosmosClient cosmosDBClient, string database, int schema)
+        public static async Task CreateDatabaseAndContainers(CosmosClient cosmosDBClient, string database, int schema)
         {
 
             Console.WriteLine($"creating database and containers for schema v{schema}");
