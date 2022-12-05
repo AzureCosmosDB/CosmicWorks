@@ -2,9 +2,16 @@
 
 namespace models
 {
-    public class CustomerV2
+
+    public class documentBase
     {
         public string id { get; set; }
+        public string type { get;set; }
+        public int version { get; set; }
+    }
+
+    public class CustomerV2: documentBase
+    {
         public string title { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
@@ -13,6 +20,20 @@ namespace models
         public string creationDate { get; set; }
         public List<CustomerAddress> addresses { get; set; }
         public Password password { get; set; }
+    }
+
+    public class CustomerV4 : documentBase
+    {
+        public string customerId { get; set; }
+        public string title { get; set; }
+        public string firstName { get; set; }
+        public string lastName { get; set; }
+        public string emailAddress { get; set; }
+        public string phoneNumber { get; set; }
+        public string creationDate { get; set; }
+        public List<CustomerAddress> addresses { get; set; }
+        public Password password { get; set; }
+        public int salesOrderCount { get; set; }
     }
 
     public class CustomerAddress
@@ -38,16 +59,13 @@ namespace models
         public string salt { get; set; }
     }
 
-    public class ProductCategory
+    public class ProductCategory: documentBase
     {
-        public string id { get; set; }
         public string name { get; set; }
-        public string type { get; set; }
     }
 
-    public class Product
+    public class Product: documentBase
     {
-        public string id { get; set; }
         public string categoryId { get; set; }
         public string categoryName { get; set; }
         public string sku { get; set; }
@@ -57,16 +75,13 @@ namespace models
         public List<Tag> tags { get; set; }
     }
 
-    public class Tag
+    public class Tag: documentBase
     {
-        public string id { get; set; }
         public string name { get; set; }
     }
 
-    public class SalesOrder
+    public class SalesOrder: documentBase
     {
-        public string id { get; set; }
-        public string type { get; set; }
         public string customerId { get; set; }
         public string orderDate { get; set; }
         public string shipDate { get; set; }
@@ -81,25 +96,8 @@ namespace models
         public int quantity { get; set; }
     }
 
-    public class CustomerV4
+    public class CategorySales: documentBase
     {
-        public string id { get; set; }
-        public string type { get; set; }
-        public string customerId { get; set; }
-        public string title { get; set; }
-        public string firstName { get; set; }
-        public string lastName { get; set; }
-        public string emailAddress { get; set; }
-        public string phoneNumber { get; set; }
-        public string creationDate { get; set; }
-        public List<CustomerAddress> addresses { get; set; }
-        public Password password { get; set; }
-        public int salesOrderCount { get; set; }
-    }
-
-    public class CategorySales
-    {
-        public string id { get; set; }
         public string categoryId { get; set; }
         public string categoryName { get; set; }
         public int totalSales { get; set; }
