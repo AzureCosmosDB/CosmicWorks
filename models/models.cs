@@ -3,15 +3,9 @@
 namespace models
 {
 
-    public class documentBase
+    public class CustomerV2
     {
         public string id { get; set; }
-        public string type { get;set; }
-        public int version { get; set; }
-    }
-
-    public class CustomerV2: documentBase
-    {
         public string title { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
@@ -22,8 +16,10 @@ namespace models
         public Password password { get; set; }
     }
 
-    public class CustomerV4 : documentBase
+    public class CustomerV4
     {
+        public string id { get; set; }
+        public string type { get; set; }
         public string customerId { get; set; }
         public string title { get; set; }
         public string firstName { get; set; }
@@ -59,13 +55,16 @@ namespace models
         public string salt { get; set; }
     }
 
-    public class ProductCategory: documentBase
+    public class ProductCategory
     {
+        public string id { get; set; }
+        public string type { get; set; }
         public string name { get; set; }
     }
 
-    public class Product: documentBase
+    public class Product
     {
+        public string id { get; set; }
         public string categoryId { get; set; }
         public string categoryName { get; set; }
         public string sku { get; set; }
@@ -75,13 +74,16 @@ namespace models
         public List<Tag> tags { get; set; }
     }
 
-    public class Tag: documentBase
+    public class Tag
     {
+        public string id { get; set; }        
         public string name { get; set; }
     }
 
-    public class SalesOrder: documentBase
+    public class SalesOrder
     {
+        public string id { get; set; }
+        public string type { get; set; }
         public string customerId { get; set; }
         public string orderDate { get; set; }
         public string shipDate { get; set; }
@@ -96,10 +98,4 @@ namespace models
         public int quantity { get; set; }
     }
 
-    public class CategorySales: documentBase
-    {
-        public string categoryId { get; set; }
-        public string categoryName { get; set; }
-        public int totalSales { get; set; }
-    }
 }
