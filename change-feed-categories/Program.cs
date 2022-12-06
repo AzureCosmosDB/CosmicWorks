@@ -73,13 +73,14 @@ namespace ChangeFeedConsole
         private static async Task UpdateProductCategoryName(string categoryId, string categoryName)
         {
             //query all products for the category
-            string sql = $"SELECT * FROM c WHERE c.categoryId = '{categoryId}'";
+            string sql = $"SELECT * FROM c WHERE c.categoryId = @categoryId";
 
             FeedIterator<Product> resultSet = productContainer.GetItemQueryIterator<Product>(
-                new QueryDefinition(sql), 
+                new QueryDefinition(sql)
+                .WithParameter("@categoryId",categoryId), 
                 requestOptions: new QueryRequestOptions 
                 { 
-                    PartitionKey = new PartitionKey(categoryId) 
+                    PartitionKey = new PartitionKey(categoryId)
                 });
 
             int productCount = 0;
