@@ -117,6 +117,7 @@ namespace modeling_demos
             List<SchemaDetails>[] DatabaseSchema = new List<SchemaDetails>[5];
 
             List<SchemaDetails> DatabaseSchema_1 = new List<SchemaDetails> {
+                new SchemaDetails {ContainerName="customer",Pk="/id"},
                 new SchemaDetails {ContainerName="customerAddress",Pk="/id"},
                 new SchemaDetails {ContainerName="customerPassword",Pk="/id"},
                 new SchemaDetails {ContainerName="product",Pk="/id"},
