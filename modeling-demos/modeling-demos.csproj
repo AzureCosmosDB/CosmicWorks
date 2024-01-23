@@ -7,7 +7,7 @@
     <UserSecretsId>ec64f566-9cf9-45bc-92e4-95b00002eeb5</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.31.2" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.37.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
