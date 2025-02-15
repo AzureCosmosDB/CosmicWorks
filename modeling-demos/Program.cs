@@ -5,8 +5,10 @@ using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using models;
+using cosmos_management;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using Azure.Identity;
 
 namespace modeling_demos
 {
@@ -18,14 +20,17 @@ namespace modeling_demos
         private static IConfigurationBuilder builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile(@"appSettings.json", optional: false, reloadOnChange: true)
-            .AddUserSecrets<Secrets>();
+            .AddUserSecrets<Program>();
 
         private static IConfigurationRoot config = builder.Build();
 
-        private static readonly string uri = config["uri"];
-        private static readonly string key = config["key"];
+        private static readonly Management management = new Management(config);
 
-        private static readonly CosmosClient client = new CosmosClient(uri, key);
+        private static readonly string uri = config["uri"];
+        //private static readonly string key = config["key"];
+
+        //private static readonly CosmosClient client = new CosmosClient(uri, key);
+        private static readonly CosmosClient client = new CosmosClient(uri, new DefaultAzureCredential());
 
         public static async Task Main(string[] args)
         {
@@ -110,7 +115,7 @@ namespace modeling_demos
                 else if (result.KeyChar == 'k')
                 {
                     // Create databases and containers
-                    await Deployment.CreateDatabase(client);
+                    await Deployment.CreateDatabaseAndContainers(management);
                     Console.Clear();
                     
                 }
@@ -123,7 +128,7 @@ namespace modeling_demos
                 else if (result.KeyChar == 'm')
                 {
                     //Delete databases and containers
-                    await Deployment.DeleteDatabase(client);
+                    await Deployment.DeleteAllDatabases(management);
                     Console.Clear();
               
                 }
