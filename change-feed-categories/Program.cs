@@ -5,7 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
+using Azure.Identity;
 using models;
+using cosmos_management;
+
 
 namespace ChangeFeedConsole
 {
@@ -20,20 +23,27 @@ namespace ChangeFeedConsole
 
         private static IConfigurationRoot config = builder.Build();
 
-        private static readonly string uri = config["uri"];
-        private static readonly string key = config["key"];
-        private static readonly CosmosClient client = new CosmosClient(uri, key);
+        private static readonly Management management = new Management(config);
 
-        private static readonly CosmosClient _client = new CosmosClient(uri, key);
-        private static readonly Database database = _client.GetDatabase("database-v3");
+        private static readonly string uri = config["uri"];
+        //private static readonly string key = config["key"];
+        //private static readonly CosmosClient client = new CosmosClient(uri, key);
+
+        private static readonly CosmosClient client = new CosmosClient(uri, new DefaultAzureCredential());
+
+        private static readonly Database database = client.GetDatabase("database-v3");
         private static readonly Container productCategoryContainer = database.GetContainer("productCategory");
         private static readonly Container productContainer = database.GetContainer("product");
 
         static async Task Main(string[] args)
         {
-            
-            ContainerProperties leaseContainerProperties = new ContainerProperties("consoleLeases", "/id");
-            Container leaseContainer = await database.CreateContainerIfNotExistsAsync(leaseContainerProperties, throughput: 400);
+
+            await management.CreateOrUpdateCosmosDBContainer("database-v3", "leases", "/id");
+            Container leaseContainer = database.GetContainer("leases");
+
+            //ContainerProperties leaseContainerProperties = new ContainerProperties("consoleLeases", "/id");
+            //Container leaseContainer = await database.CreateContainerIfNotExistsAsync(leaseContainerProperties, throughput: 400);
+                        
 
             var builder = productCategoryContainer.GetChangeFeedProcessorBuilder("ProductCategoryProcessor",
                 async (IReadOnlyCollection<ProductCategory> input, CancellationToken cancellationToken) => 

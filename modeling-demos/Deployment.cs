@@ -6,168 +6,80 @@ using System.Threading;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Microsoft.Azure.Cosmos;
+using cosmos_management;
 
 
 namespace modeling_demos
 {
     class Deployment
     {
-    
+
         // private static readonly string gitdatapath = config["gitdatapath"];
-        private static string gitdatapath = "https://api.github.com/repos/MicrosoftDocs/mslearn-cosmosdb-modules-central/contents/data/fullset/";
+        //private static string gitdatapath = "https://api.github.com/repos/MicrosoftDocs/mslearn-cosmosdb-modules-central/contents/data/fullset/";
+        private static string gitdatapath = "https://api.github.com/repos/AzureCosmosDB/CosmicWorks/contents/data/";
 
 
         public static async Task LoadDatabase(CosmosClient cosmosDBClient, bool force=false, int? schemaVersion=null)
         {
-            {
-                int schemaVersionStart = 1;
-                int schemaVersionEnd = 4;
-                if (!(schemaVersion is null))
-                {
-                    schemaVersionStart = (int)schemaVersion;
-                    schemaVersionEnd = (int)schemaVersion;
-                }
-                else
-                {
-                    schemaVersionStart = 1;
-                    schemaVersionEnd = 4;
-                }
-                for (int schemaVersionCounter = schemaVersionStart; schemaVersionCounter <= schemaVersionEnd; schemaVersionCounter++)
-                {
-                    Console.WriteLine($"download started for schema {schemaVersionCounter}");
-                    if (force == true)
-                    {
-                        await GetFilesFromRepo($"database-v{schemaVersionCounter.ToString()}", force = true);
-                    }
-                    else
-                    {
-                        await GetFilesFromRepo($"database-v{schemaVersionCounter.ToString()}");
-                    }
 
-                    LoadContainersFromFolder(cosmosDBClient, $"database-v{schemaVersionCounter.ToString()}", $"database-v{schemaVersionCounter.ToString()}");
-                }
-            }
+            await GetFilesFromRepo("database-v1", force);
+            await GetFilesFromRepo("database-v2", force);
+            await GetFilesFromRepo("database-v3", force);
+            await GetFilesFromRepo("database-v4", force);
+
+            LoadContainersFromFolder(cosmosDBClient, "database-v1", "database-v1");
+            LoadContainersFromFolder(cosmosDBClient, "database-v2", "database-v2");
+            LoadContainersFromFolder(cosmosDBClient, "database-v3", "database-v3");
+            LoadContainersFromFolder(cosmosDBClient, "database-v4", "database-v4");
+
         }
 
-        public static async Task CreateDatabase(CosmosClient cosmosDBClient, bool force=false, int? schemaVersion=null)
+        
+
+        public static async Task DeleteAllDatabases(Management management)
         {
-            {
-                int schemaVersionStart = 1;
-                int schemaVersionEnd = 4;
-                if (!(schemaVersion is null))
-                {
-                    schemaVersionStart = (int)schemaVersion;
-                    schemaVersionEnd = (int)schemaVersion;
-                }
-                else
-                {
-                    schemaVersionStart = 1;
-                    schemaVersionEnd = 4;
-                }
-                for (int schemaVersionCounter = schemaVersionStart; schemaVersionCounter <= schemaVersionEnd; schemaVersionCounter++)
-                {
-                    Console.WriteLine($"create started for schema {schemaVersionCounter}");
-                    await CreateDatabaseAndContainers(cosmosDBClient,$"database-v{schemaVersionCounter.ToString()}", schemaVersionCounter);
-                }
-            }
+            await management.DeleteAllCosmosDBDatabaes();
         }
+        
 
-        public static async Task DeleteDatabase(CosmosClient cosmosDBClient, bool force = false, int? schemaVersion = null)
-        {
-            {
-                int schemaVersionStart = 1;
-                int schemaVersionEnd = 4;
-                if (!(schemaVersion is null))
-                {
-                    schemaVersionStart = (int)schemaVersion;
-                    schemaVersionEnd = (int)schemaVersion;
-                }
-                else
-                {
-                    schemaVersionStart = 1;
-                    schemaVersionEnd = 4;
-                }
-                for (int schemaVersionCounter = schemaVersionStart; schemaVersionCounter <= schemaVersionEnd; schemaVersionCounter++)
-                {
-                    Console.WriteLine($"delete started for schema {schemaVersionCounter}");
-                    await DeleteDatabaseAndContainers(cosmosDBClient, $"database-v{schemaVersionCounter.ToString()}");
-                }
-            }
-        }
-        public static async Task DeleteDatabaseAndContainers(CosmosClient cosmosDBClient, string database)
-        {
-            Console.WriteLine($"Deteting database and containers");
-            Console.WriteLine($"DatabaseName:{database} key:provided");
-            Database cosmosDatabase = cosmosDBClient.GetDatabase(database);
-            Console.WriteLine($"Are you sure you want to delete {cosmosDatabase.Id} (Y/N) : ");
-            string? response = Console.ReadLine();
-            if((response??"") == "Y" | (response??"") == "y")
-            {
-                await cosmosDatabase.DeleteAsync();
-                Console.Write("   Database deleted!");
-            }
-        }
-
-        public static async Task CreateDatabaseAndContainers(CosmosClient cosmosDBClient, string database, int schema)
+        public static async Task CreateDatabaseAndContainers(Management management)
         {
 
-            Console.WriteLine($"creating database and containers for schema v{schema}");
-            Console.WriteLine($"DatabaseName:{database} key:provided");
+            Console.WriteLine($"Creating database and containers for schema database-v1");
+            await management.CreateOrUpdateCosmosDBDatabase("database-v1");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "customer", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "customerAddress", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "customerPassword", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "product", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "productCategory", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "productTag", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "productTags", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "salesOrder", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v1", "salesOrderDetail", "/id");
 
-            List<SchemaDetails>[] DatabaseSchema = new List<SchemaDetails>[5];
+            Console.WriteLine($"Creating database and containers for schema database-v2");
+            await management.CreateOrUpdateCosmosDBDatabase("database-v2");
+            await management.CreateOrUpdateCosmosDBContainer("database-v2", "customer", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v2", "product", "/categoryId");
+            await management.CreateOrUpdateCosmosDBContainer("database-v2", "productCategory", "/type");
+            await management.CreateOrUpdateCosmosDBContainer("database-v2", "productTag", "/type");
+            await management.CreateOrUpdateCosmosDBContainer("database-v2", "salesOrder", "/customerId");
 
-            List<SchemaDetails> DatabaseSchema_1 = new List<SchemaDetails> {
-                new SchemaDetails {ContainerName="customer",Pk="/id"},
-                new SchemaDetails {ContainerName="customerAddress",Pk="/id"},
-                new SchemaDetails {ContainerName="customerPassword",Pk="/id"},
-                new SchemaDetails {ContainerName="product",Pk="/id"},
-                new SchemaDetails {ContainerName="productCategory",Pk="/id"},
-                new SchemaDetails {ContainerName="productTag",Pk="/id"},
-                new SchemaDetails {ContainerName="productTags",Pk="/id"},
-                new SchemaDetails {ContainerName="salesOrder",Pk="/id"},
-                new SchemaDetails {ContainerName="salesOrderDetail",Pk="/id"}
-              };
+            Console.WriteLine($"Creating database and containers for schema database-v3");
+            await management.CreateOrUpdateCosmosDBDatabase("database-v3");
+            await management.CreateOrUpdateCosmosDBContainer("database-v3", "customer", "/id");
+            await management.CreateOrUpdateCosmosDBContainer("database-v3", "product", "/categoryId");
+            await management.CreateOrUpdateCosmosDBContainer("database-v3", "productCategory", "/type");
+            await management.CreateOrUpdateCosmosDBContainer("database-v3", "productTag", "/type");
+            await management.CreateOrUpdateCosmosDBContainer("database-v3", "salesOrder", "/customerId");
 
-            List<SchemaDetails> DatabaseSchema_2 = new List<SchemaDetails> {
-                new SchemaDetails {ContainerName="customer",Pk="/id"},
-                new SchemaDetails {ContainerName="product",Pk="/categoryId"},
-                new SchemaDetails {ContainerName="productCategory",Pk="/type"},
-                new SchemaDetails {ContainerName="productTag",Pk="/type"},
-                new SchemaDetails {ContainerName="salesOrder",Pk="/customerId"}
-                };
-
-            List<SchemaDetails> DatabaseSchema_3 = new List<SchemaDetails> {
-                new SchemaDetails {ContainerName="customer",Pk= "/id"},
-                new SchemaDetails {ContainerName="product",Pk="/categoryId"},
-                new SchemaDetails {ContainerName="productCategory",Pk="/type"},
-                new SchemaDetails {ContainerName="productTag",Pk= "/type"},
-                new SchemaDetails {ContainerName="salesOrder",Pk= "/customerId"}
-                };
-
-            List<SchemaDetails> DatabaseSchema_4 = new List<SchemaDetails> {
-                 new SchemaDetails {ContainerName= "customer",Pk="/customerId"},
-                new SchemaDetails {ContainerName= "product",Pk= "/categoryId"},
-                new SchemaDetails {ContainerName= "productMeta",Pk="/type"},
-                new SchemaDetails {ContainerName= "salesByCategory",Pk="/categoryId"}
-                };
-
-            DatabaseSchema[1] = DatabaseSchema_1;
-            DatabaseSchema[2] = DatabaseSchema_2;
-            DatabaseSchema[3] = DatabaseSchema_3;
-            DatabaseSchema[4] = DatabaseSchema_4;
-
-
-            if (schema >= 1 & schema <= 4)
-            {
-                ThroughputProperties throughputProperties = ThroughputProperties.CreateAutoscaleThroughput(4000);
-                Database cosmosDatabase = await cosmosDBClient.CreateDatabaseAsync(database, throughputProperties);
-                Console.WriteLine($"  {cosmosDatabase.Id} created");
-                foreach (var ContainerSchema in DatabaseSchema[schema])
-                {
-                    Container container = await cosmosDatabase.CreateContainerAsync(ContainerSchema.ContainerName, ContainerSchema.Pk);
-                    Console.WriteLine($"  container:{cosmosDatabase.Id}.{container.Id} created!");
-                }
-            }
+            Console.WriteLine($"Creating database and containers for schema database-v4");
+            await management.CreateOrUpdateCosmosDBDatabase("database-v4");
+            await management.CreateOrUpdateCosmosDBContainer("database-v4", "customer", "/customerId");
+            await management.CreateOrUpdateCosmosDBContainer("database-v4", "product", "/categoryId");
+            await management.CreateOrUpdateCosmosDBContainer("database-v4", "productMeta", "/type");
+            await management.CreateOrUpdateCosmosDBContainer("database-v4", "salesByCategory", "/categoryId");
+            
         }
 
         private static async Task GetFilesFromRepo(string databaseName, bool force = false)
