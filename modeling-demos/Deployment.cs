@@ -19,31 +19,16 @@ namespace modeling_demos
         private static string gitdatapath = "https://api.github.com/repos/AzureCosmosDB/CosmicWorks/contents/data/";
 
 
-        public static async Task LoadDatabase(CosmosClient cosmosDBClient, bool force=false, int? schemaVersion=null)
-        {
-
-            await GetFilesFromRepo("database-v1", force);
-            await GetFilesFromRepo("database-v2", force);
-            await GetFilesFromRepo("database-v3", force);
-            await GetFilesFromRepo("database-v4", force);
-
-            LoadContainersFromFolder(cosmosDBClient, "database-v1", "database-v1");
-            LoadContainersFromFolder(cosmosDBClient, "database-v2", "database-v2");
-            LoadContainersFromFolder(cosmosDBClient, "database-v3", "database-v3");
-            LoadContainersFromFolder(cosmosDBClient, "database-v4", "database-v4");
-
-        }
-
-        
-
-        public static async Task DeleteAllDatabases(Management management)
+        public static async Task DeleteAllDatabases(CosmosManagement management)
         {
             await management.DeleteAllCosmosDBDatabaes();
+            
         }
         
-
-        public static async Task CreateDatabaseAndContainers(Management management)
+        public static async Task CreateDatabaseAndContainers(CosmosManagement management)
         {
+
+            await management.ApplyCosmosRbacToAccount();
 
             Console.WriteLine($"Creating database and containers for schema database-v1");
             await management.CreateOrUpdateCosmosDBDatabase("database-v1");
@@ -67,6 +52,7 @@ namespace modeling_demos
 
             Console.WriteLine($"Creating database and containers for schema database-v3");
             await management.CreateOrUpdateCosmosDBDatabase("database-v3");
+            await management.CreateOrUpdateCosmosDBContainer("database-v3", "leases", "/id");
             await management.CreateOrUpdateCosmosDBContainer("database-v3", "customer", "/id");
             await management.CreateOrUpdateCosmosDBContainer("database-v3", "product", "/categoryId");
             await management.CreateOrUpdateCosmosDBContainer("database-v3", "productCategory", "/type");
@@ -82,6 +68,28 @@ namespace modeling_demos
             
         }
 
+
+        public static async Task LoadData(CosmosClient cosmosDBClient, bool force = false, int? schemaVersion = null)
+        {
+
+            await GetFilesFromRepo("database-v1", force);
+            await GetFilesFromRepo("database-v2", force);
+            await GetFilesFromRepo("database-v3", force);
+            await GetFilesFromRepo("database-v4", force);
+
+            cosmosDBClient.ClientOptions.AllowBulkExecution = true;
+            cosmosDBClient.ClientOptions.EnableContentResponseOnWrite = false;
+
+            LoadContainersFromFolder(cosmosDBClient, "database-v1", "xdatabase-v1");
+            LoadContainersFromFolder(cosmosDBClient, "database-v2", "xdatabase-v2");
+            LoadContainersFromFolder(cosmosDBClient, "database-v3", "xdatabase-v3");
+            LoadContainersFromFolder(cosmosDBClient, "database-v4", "xdatabase-v4");
+
+            cosmosDBClient.ClientOptions.AllowBulkExecution = false;
+            cosmosDBClient.ClientOptions.EnableContentResponseOnWrite = true;
+
+        }
+
         private static async Task GetFilesFromRepo(string databaseName, bool force = false)
         {
             string folder = "data" + Path.DirectorySeparatorChar + databaseName;
@@ -89,7 +97,7 @@ namespace modeling_demos
             Console.WriteLine("Geting file info from repo");
             HttpClient httpClient = new HttpClient();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("User-Agent", "cosmicworks-samples-client");
+            request.Headers.Add("User-Agent", "cosmicworks-samples-cosmosClient");
 
             if (!Directory.Exists(folder))
             {
@@ -142,7 +150,7 @@ namespace modeling_demos
             {
                 downloadTask.Wait();
             }
-            catch (AggregateException ex)
+            catch (AggregateException)
             {
 
             }
@@ -159,17 +167,17 @@ namespace modeling_demos
             if (downloadTask.Status == TaskStatus.RanToCompletion) Console.WriteLine("Files download sucessfully");
         }
 
-        private static void LoadContainersFromFolder(CosmosClient client, string SourceDatabaseName, string TargetDatabaseName, bool useBulk=true)
+        private static void LoadContainersFromFolder(CosmosClient client, string folderName, string databaseName)
         {
-            if(useBulk)
-            {
-                client.ClientOptions.AllowBulkExecution = true;
-            }
-            string folder = "data" + Path.DirectorySeparatorChar + SourceDatabaseName;
-            Database database = client.GetDatabase(TargetDatabaseName);
             Console.WriteLine("Preparing to load containers");
+
+            Database database = client.GetDatabase(databaseName);
+
+            string folder = "data" + Path.DirectorySeparatorChar + folderName;            
             string[] fileEntries = Directory.GetFiles(folder);
+            
             List<Task> concurrentLoads = new List<Task>();
+
             foreach (string fileName in fileEntries)
             {
                 var containerName = fileName.Split(Path.DirectorySeparatorChar)[2];
@@ -190,7 +198,7 @@ namespace modeling_demos
             {
                 concurrentLoad.Wait();
             }
-            catch (AggregateException ex)
+            catch (AggregateException)
             {
 
             }
@@ -212,13 +220,46 @@ namespace modeling_demos
 
         }
 
-        private static async Task LoadContainerFromFile(Container container, string file, Boolean noBulk = false)
+        private static async Task LoadContainerFromFile(Container container, string file)
+        {
+            using (StreamReader streamReader = new StreamReader(file))
+            {
+                string itemsJson = streamReader.ReadToEnd();
+                dynamic itemsArray = JsonConvert.DeserializeObject(itemsJson);
+                List<Task> tasks = new List<Task>();
+                foreach (var item in itemsArray)
+                {
+                    tasks.Add(CreateItemWithRetryAsync(container, item));
+                }
+                await Task.WhenAll(tasks);
+            }
+        }
+
+        private static async Task CreateItemWithRetryAsync(Container container, dynamic record)
+        {
+            bool retry = true;
+            while (retry)
+            {
+                try
+                {
+                    await container.CreateItemAsync(record);
+                    break;
+                }
+                catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    int waitTime = ex.RetryAfter.HasValue ? ex.RetryAfter.Value.Milliseconds : 1000;
+                    Console.WriteLine($"Rate limited. Waiting for {waitTime}ms before retrying...");
+                    await Task.Delay(waitTime);
+                }
+            }
+        }
+
+        private static async Task LoadContainerFromFile1(Container container, string file)
         {
             using (StreamReader streamReader = new StreamReader(file))
             {
 
                 int maxConcurrentTasks = 200;
-                bool usebulk = !noBulk;
 
                 string recordsJson = streamReader.ReadToEnd();
                 dynamic recordsArray = JsonConvert.DeserializeObject(recordsJson);
@@ -230,14 +271,9 @@ namespace modeling_demos
                 int totalDocs = recordsArray.Count;
                 foreach (var record in recordsArray)
                 {
-                    if (usebulk)
-                    {
-                        concurrentTasks.Add(container.CreateItemAsync(record));
-                    }
-                    else
-                    {
-                        container.CreateItemAsync(record);
-                    }
+                    
+                    concurrentTasks.Add(container.CreateItemAsync(record));
+                    
                     batchCounter++;
                     if (batchCounter >= maxConcurrentTasks)
                     {
@@ -278,18 +314,6 @@ namespace modeling_demos
             public long size=0;
             public String download_url="";
         }
-
-        class Secrets
-        {
-            public string uri="";
-            public string key="";
-        };
-
-        public class SchemaDetails
-        {
-            public string ContainerName;
-            public string Pk;
-        };
 
     }
 }

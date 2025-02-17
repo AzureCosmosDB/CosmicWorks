@@ -13,9 +13,9 @@ using System.IO;
 
 namespace cosmos_management
 {
-    public class Management
+    public class CosmosManagement
     {
-        private IConfigurationRoot _config;
+        private IConfiguration _config;
         private readonly string _subscriptionId = "your-subscription-id";
         private readonly string _resourceGroupName = "your-resource-group-name";
         private readonly string _location = "East US";
@@ -24,7 +24,7 @@ namespace cosmos_management
         private readonly ArmClient _armClient;
 
 
-        public Management(IConfigurationRoot config)
+        public CosmosManagement(IConfiguration config)
         {
             _config = config;
             _subscriptionId = _config["subscriptionId"]!;
@@ -149,6 +149,99 @@ namespace cosmos_management
             CosmosDBSqlContainerResource resource = response.Value;
 
             Console.WriteLine($"Created new Container: {resource.Data.Id}");
+        }
+
+        public async Task ApplyCosmosRbacToAccount()
+        {
+            await CreateOrUpdateRoleAssignment(await GetBuiltInDataContributorRoleDefinitionAsync());
+        }
+
+        private async Task CreateOrUpdateRoleAssignment(ResourceIdentifier roleDefintionId)
+        {
+
+            //Get the principal ID of the current logged-in user
+            Guid? principalId = await GetCurrentUserPrincipalIdAsync();
+
+            //Select the type of role to assign
+            //ResourceIdentifier roleDefintionId = await GetBuiltInDataContributorRoleDefinitionAsync();
+            //ResourceIdentifier roleDefinitionId = await CreateOrUpdateCustomRoleDefinition();
+
+            //Select the scope of the role permissions
+            string assignableScope = GetAssignableScope(Scope.Account);
+
+            //Role assignment properties
+            CosmosDBSqlRoleAssignmentCreateOrUpdateContent properties = new CosmosDBSqlRoleAssignmentCreateOrUpdateContent()
+            {
+                RoleDefinitionId = roleDefintionId,
+                Scope = assignableScope,
+                PrincipalId = principalId
+            };
+
+            //Construct a new role assignment resource
+            string roleAssignmentId = Guid.NewGuid().ToString();
+            ResourceIdentifier resourceId = CosmosDBSqlRoleAssignmentResource.CreateResourceIdentifier(_subscriptionId, _resourceGroupName, _accountName, roleAssignmentId);
+            CosmosDBSqlRoleAssignmentResource roleAssignment = _armClient.GetCosmosDBSqlRoleAssignmentResource(resourceId);
+
+            //Update the role assignment with the new properties
+            ArmOperation<CosmosDBSqlRoleAssignmentResource> response = await roleAssignment.UpdateAsync(WaitUntil.Completed, properties);
+            CosmosDBSqlRoleAssignmentResource resource = response.Value;
+
+            Console.WriteLine($"Created new Role Assignment: {resource.Data.Id}");
+        }
+
+        private async Task<Guid?> GetCurrentUserPrincipalIdAsync()
+        {
+
+            // Get the principal Id of the current logged-in user
+            GraphServiceClient graphClient = new(_credential);
+
+            User? user = await graphClient.Me.GetAsync();
+
+            if (user == null || user.Id == null)
+                throw new InvalidOperationException("User or User ID is null.");
+
+            Guid principalId = new(user.Id);
+
+            return principalId;
+
+        }
+
+        private async Task<ResourceIdentifier> GetBuiltInDataContributorRoleDefinitionAsync()
+        {
+
+            //Built-in roles are predefined roles that are available in Azure Cosmos DB
+            //Cosmos DB Built-in Data Contributor role definition ID
+            string roleDefinitionId = "00000000-0000-0000-0000-000000000002";
+
+            //Get the role definition
+            ResourceIdentifier resourceId = CosmosDBSqlRoleDefinitionResource.CreateResourceIdentifier(_subscriptionId, _resourceGroupName, _accountName, roleDefinitionId);
+            CosmosDBSqlRoleDefinitionResource roleDefinition = await _armClient.GetCosmosDBSqlRoleDefinitionResource(resourceId).GetAsync();
+
+            return roleDefinition.Id;
+        }
+
+        private string GetAssignableScope(Scope scope)
+        {
+            // Switch statement to set the permission scope
+            string scopeString = scope switch
+            {
+                Scope.Subscription => $"/subscriptions/{_subscriptionId}",
+                Scope.ResourceGroup => $"/subscriptions/{_subscriptionId}/resourceGroups/{_resourceGroupName}",
+                Scope.Account => $"/subscriptions/{_subscriptionId}/resourceGroups/{_resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{_accountName}",
+                //Scope.Database => $"/subscriptions/{_subscriptionId}/resourceGroups/{_resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{_accountName}/dbs/{_databaseName}",
+                //Scope.Container => $"/subscriptions/{_subscriptionId}/resourceGroups/{_resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{_accountName}/dbs/{_databaseName}/colls/{_containerName}",
+                _ => $"/subscriptions/{_subscriptionId}/resourceGroups/{_resourceGroupName}/providers/Microsoft.DocumentDB/databaseAccounts/{_accountName}",
+            };
+            return scopeString;
+        }
+
+        private enum Scope
+        {
+            Subscription,
+            ResourceGroup,
+            Account,
+            Database,
+            Container
         }
 
     }

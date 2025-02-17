@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: cosmos-db-nosql-dotnet-quickstart
+metadata:
+  template: cosmos-db-nosql-dotnet-quickstart
+services:
+  web:
+    project: ./src/web
+    language: csharp
+    host: containerapp
+    docker:
+      path: ../Dockerfile
+      context: ../
+pipeline:
+  provider: github
+hooks:
+  postprovision:
+    windows:
+      run: |
+        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:ENDPOINT" "$env:CONFIGURATION__AZURECOSMOSDB__ENDPOINT" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:DATABASENAME" "$env:CONFIGURATION__AZURECOSMOSDB__DATABASENAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:CONTAINERNAME" "$env:CONFIGURATION__AZURECOSMOSDB__CONTAINERNAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+      shell: pwsh
+      continueOnError: false
+      interactive: true
+    posix:
+      run: |
+        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:ENDPOINT" "$CONFIGURATION__AZURECOSMOSDB__ENDPOINT" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:DATABASENAME" "$CONFIGURATION__AZURECOSMOSDB__DATABASENAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:CONTAINERNAME" "$CONFIGURATION__AZURECOSMOSDB__CONTAINERNAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+      shell: sh
+      continueOnError: false
+      interactive: true

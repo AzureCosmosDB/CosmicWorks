@@ -19,11 +19,11 @@ namespace ChangeFeedConsole
         private static IConfigurationBuilder builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile(@"appSettings.json", optional: false, reloadOnChange: true)
-            .AddUserSecrets<Secrets>();
+            .AddUserSecrets<Program>();
 
         private static IConfigurationRoot config = builder.Build();
 
-        private static readonly Management management = new Management(config);
+        private static readonly CosmosManagement management = new CosmosManagement(config);
 
         private static readonly string uri = config["uri"];
         //private static readonly string key = config["key"];
@@ -117,11 +117,5 @@ namespace ChangeFeedConsole
                 Console.WriteLine($"Updated {productCount} products with updated category name '{categoryName}'");
             }
         }
-    }
-
-    class Secrets
-    {
-        public string uri;
-        public string key;
     }
 }

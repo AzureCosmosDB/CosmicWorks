@@ -1,39 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using models;
 using cosmos_management;
-using Microsoft.Extensions.Configuration;
-using System.IO;
-using Azure.Identity;
+
 
 namespace modeling_demos
 {
     class Program
     {
-        //=================================================================
-        //Load secrets
 
-        private static IConfigurationBuilder builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(@"appSettings.json", optional: false, reloadOnChange: true)
+        static CosmosClient cosmosClient;
+        static CosmosManagement cosmosManagement;
+        static ChangeFeed changeFeed;
+
+        public static void AddConfiguration(IConfigurationBuilder config)
+        {
+            config.AddJsonFile(@"appSettings.json", optional: false, reloadOnChange: true)
             .AddUserSecrets<Program>();
 
-        private static IConfigurationRoot config = builder.Build();
+            var configuration = config.Build();
+            var uri = configuration["uri"];
 
-        private static readonly Management management = new Management(config);
+            // Create the CosmosClient instance
+            cosmosClient = new CosmosClient(uri, new DefaultAzureCredential());
 
-        private static readonly string uri = config["uri"];
-        //private static readonly string key = config["key"];
+            // Create the CosmosManagement instance
+            cosmosManagement = new CosmosManagement(configuration);
 
-        //private static readonly CosmosClient client = new CosmosClient(uri, key);
-        private static readonly CosmosClient client = new CosmosClient(uri, new DefaultAzureCredential());
+            // Create the ChangeFeed instance
+            changeFeed = new ChangeFeed(cosmosClient);
+
+        }
+
+        public static void RegisterServices(IServiceCollection services)
+        {
+            
+            //services.AddSingleton<CosmosManagement>();
+            //services.AddSingleton<CosmosClient>();
+            //services.AddHostedService<ChangeFeed>();
+        }
 
         public static async Task Main(string[] args)
         {
+            var host = Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    AddConfiguration(config);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    //RegisterServices(services);
+                })
+                .Build();
+
+            await changeFeed.StartChangeFeedProcessorAsync();
+
+            await RunApp();
+        }
+        public static async Task RunApp()
+        {
+            // Your existing code to run the application
             bool exit = false;
             while (exit == false)
             {
@@ -115,34 +149,31 @@ namespace modeling_demos
                 else if (result.KeyChar == 'k')
                 {
                     // Create databases and containers
-                    await Deployment.CreateDatabaseAndContainers(management);
+                    await Deployment.CreateDatabaseAndContainers(cosmosManagement);
                     Console.Clear();
-                    
                 }
                 else if (result.KeyChar == 'l')
                 {
-                    //Upload data to containers
-                    await Deployment.LoadDatabase(client);
+                    // Upload data to containers
+                    await Deployment.LoadData(cosmosClient);
                     Console.Clear();
                 }
                 else if (result.KeyChar == 'm')
                 {
-                    //Delete databases and containers
-                    await Deployment.DeleteAllDatabases(management);
+                    // Delete databases and containers
+                    await Deployment.DeleteAllDatabases(cosmosManagement);
                     Console.Clear();
-              
                 }
                 else if (result.KeyChar == 'x')
                 {
                     exit = true;
                 }
             }
-
         }
 
-        public static async Task QueryCustomer() 
+        public static async Task QueryCustomer()
         {
-            Database database = client.GetDatabase("database-v2");
+            Database database = cosmosClient.GetDatabase("database-v2");
             Container container = database.GetContainer("customer");
 
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
@@ -176,7 +207,7 @@ namespace modeling_demos
 
         public static async Task GetCustomer()
         {
-            Database database = client.GetDatabase("database-v2");
+            Database database = cosmosClient.GetDatabase("database-v2");
             Container container = database.GetContainer("customer");
 
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
@@ -184,8 +215,8 @@ namespace modeling_demos
             Console.WriteLine("Point Read for a single customer\n");
 
             //Get a customer with a point read
-            ItemResponse<CustomerV2> response =  await container.ReadItemAsync<CustomerV2>(
-                id: customerId, 
+            ItemResponse<CustomerV2> response = await container.ReadItemAsync<CustomerV2>(
+                id: customerId,
                 partitionKey: new PartitionKey(customerId));
 
             Print(response.Resource);
@@ -197,7 +228,7 @@ namespace modeling_demos
 
         public static async Task ListAllProductCategories()
         {
-            Database database = client.GetDatabase("database-v2");
+            Database database = cosmosClient.GetDatabase("database-v2");
             Container container = database.GetContainer("productCategory");
 
             //Get all product categories
@@ -215,7 +246,7 @@ namespace modeling_demos
                 FeedResponse<ProductCategory> response = await resultSet.ReadNextAsync();
 
                 Console.WriteLine("Print out product categories\n");
-                foreach(ProductCategory productCategory in response)
+                foreach (ProductCategory productCategory in response)
                 {
                     Print(productCategory);
                 }
@@ -227,7 +258,7 @@ namespace modeling_demos
 
         public static async Task QueryProductsByCategoryId()
         {
-            Database database = client.GetDatabase("database-v3");
+            Database database = cosmosClient.GetDatabase("database-v3");
             Container container = database.GetContainer("product");
 
             //Category Name = Components, Headsets
@@ -261,21 +292,23 @@ namespace modeling_demos
 
         public static async Task QueryProductsForCategory()
         {
-            Database database = client.GetDatabase("database-v3");
+            Database database = cosmosClient.GetDatabase("database-v3");
             Container container = database.GetContainer("product");
 
             //Category Name = Accessories, Tires and Tubes
             string categoryId = "86F3CBAB-97A7-4D01-BABB-ADEFFFAED6B4";
-            
+
             //Query for this category. How many products?
             string sql = "SELECT COUNT(1) AS ProductCount, c.categoryName " +
                 "FROM c WHERE c.categoryId = '86F3CBAB-97A7-4D01-BABB-ADEFFFAED6B4' " +
                 "GROUP BY c.categoryName";
 
             FeedIterator<dynamic> resultSet = container.GetItemQueryIterator<dynamic>(
-                new QueryDefinition(sql), 
-                requestOptions: new QueryRequestOptions{ 
-                    PartitionKey = new PartitionKey(categoryId)});
+                new QueryDefinition(sql),
+                requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(categoryId)
+                });
 
             Console.WriteLine("Print out category name and number of products in that category\n");
             while (resultSet.HasMoreResults)
@@ -292,7 +325,7 @@ namespace modeling_demos
 
         public static async Task UpdateProductCategory()
         {
-            Database database = client.GetDatabase("database-v3");
+            Database database = cosmosClient.GetDatabase("database-v3");
             Container container = database.GetContainer("productCategory");
 
             string categoryId = "86F3CBAB-97A7-4D01-BABB-ADEFFFAED6B4";
@@ -317,7 +350,7 @@ namespace modeling_demos
 
         public static async Task RevertProductCategory()
         {
-            Database database = client.GetDatabase("database-v3");
+            Database database = cosmosClient.GetDatabase("database-v3");
             Container container = database.GetContainer("productCategory");
 
             string categoryId = "86F3CBAB-97A7-4D01-BABB-ADEFFFAED6B4";
@@ -340,19 +373,19 @@ namespace modeling_demos
 
         public static async Task QuerySalesOrdersByCustomerId()
         {
-            Database database = client.GetDatabase("database-v4");
+            Database database = cosmosClient.GetDatabase("database-v4");
             Container container = database.GetContainer("customer");
 
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
-            
+
             string sql = "SELECT * from c WHERE c.type = 'salesOrder' and c.customerId = @customerId";
 
             FeedIterator<SalesOrder> resultSet = container.GetItemQueryIterator<SalesOrder>(
                 new QueryDefinition(sql)
                 .WithParameter("@customerId", customerId),
-                requestOptions: new QueryRequestOptions 
-                { 
-                    PartitionKey = new PartitionKey(customerId) 
+                requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(customerId)
                 });
 
             Console.WriteLine("Print out orders for this customer\n");
@@ -371,7 +404,7 @@ namespace modeling_demos
 
         public static async Task QueryCustomerAndSalesOrdersByCustomerId()
         {
-            Database database = client.GetDatabase("database-v4");
+            Database database = cosmosClient.GetDatabase("database-v4");
             Container container = database.GetContainer("customer");
 
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
@@ -381,9 +414,9 @@ namespace modeling_demos
             FeedIterator<dynamic> resultSet = container.GetItemQueryIterator<dynamic>(
                 new QueryDefinition(sql)
                 .WithParameter("@customerId", customerId),
-                requestOptions: new QueryRequestOptions 
-                { 
-                    PartitionKey = new PartitionKey(customerId) 
+                requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(customerId)
                 });
 
             CustomerV4 customer = new CustomerV4();
@@ -398,7 +431,7 @@ namespace modeling_demos
                     if (item.type == "customer")
                     {
                         customer = JsonConvert.DeserializeObject<CustomerV4>(item.ToString());
-                        
+
                     }
                     else if (item.type == "salesOrder")
                     {
@@ -409,7 +442,7 @@ namespace modeling_demos
 
             Console.WriteLine("Print out customer record and all their orders\n");
             Print(customer);
-            foreach(SalesOrder order in orders)
+            foreach (SalesOrder order in orders)
             {
                 Print(order);
             }
@@ -420,13 +453,13 @@ namespace modeling_demos
 
         public static async Task CreateNewOrderAndUpdateCustomerOrderTotal()
         {
-            Database database = client.GetDatabase("database-v4");
+            Database database = cosmosClient.GetDatabase("database-v4");
             Container container = database.GetContainer("customer");
 
             //Get the customer
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
             ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
-                id: customerId, 
+                id: customerId,
                 partitionKey: new PartitionKey(customerId)
                 );
             CustomerV4 customer = response.Resource;
@@ -445,22 +478,22 @@ namespace modeling_demos
                 orderDate = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 shipDate = "",
                 details = new List<SalesOrderDetails>
-                {
-                    new SalesOrderDetails
                     {
-                        sku = "FR-M94B-38",
-                        name = "HL Mountain Frame - Black, 38",
-                        price = 1349.6,
-                        quantity = 1
-                    },
-                    new SalesOrderDetails
-                    {
-                        sku = "SO-R809-M",
-                        name = "Racing Socks, M",
-                        price = 8.99,
-                        quantity = 2
+                        new SalesOrderDetails
+                        {
+                            sku = "FR-M94B-38",
+                            name = "HL Mountain Frame - Black, 38",
+                            price = 1349.6,
+                            quantity = 1
+                        },
+                        new SalesOrderDetails
+                        {
+                            sku = "SO-R809-M",
+                            name = "Racing Socks, M",
+                            price = 8.99,
+                            quantity = 2
+                        }
                     }
-                }
             };
 
             //Submit both as a transactional batch
@@ -479,14 +512,14 @@ namespace modeling_demos
 
         public static async Task DeleteOrder()
         {
-            Database database = client.GetDatabase("database-v4");
+            Database database = cosmosClient.GetDatabase("database-v4");
             Container container = database.GetContainer("customer");
 
             string customerId = "FFD0DD37-1F0E-4E2E-8FAC-EAF45B0E9447";
             string orderId = "5350ce31-ea50-4df9-9a48-faff97675ac5";
 
             ItemResponse<CustomerV4> response = await container.ReadItemAsync<CustomerV4>(
-                id: customerId, 
+                id: customerId,
                 partitionKey: new PartitionKey(customerId)
             );
             CustomerV4 customer = response.Resource;
@@ -510,7 +543,7 @@ namespace modeling_demos
 
         public static async Task GetTop10Customers()
         {
-            Database database = client.GetDatabase("database-v4");
+            Database database = cosmosClient.GetDatabase("database-v4");
             Container container = database.GetContainer("customer");
 
             //Query to get our top 10 customers 
@@ -542,11 +575,5 @@ namespace modeling_demos
         {
             Console.WriteLine($"{JObject.FromObject(obj).ToString()}\n");
         }
-    }
-
-    class Secrets
-    {
-        public string uri="";
-        public string key="";
     }
 }
