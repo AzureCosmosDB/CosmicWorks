@@ -17,8 +17,9 @@ param deploymentUserPrincipalId string = ''
 // serviceName is used as value for the tag (azd-service-name) azd uses to identify deployment host
 param serviceName string = 'cosmic-works'
 
-var resourceToken = toLower(uniqueString(resourceGroup().id, environmentName, location))
+var resourceToken = toLower(uniqueString(resourceGroup().id, environmentName))
 var tags = {
+  'azd-service-name': serviceName
   'azd-env-name': environmentName
   repo: 'https://github.com/AzureCosmosDB/CosmicWorks'
 }
@@ -243,6 +244,6 @@ module cosmosDbAccount 'br/public:avm/res/document-db/database-account:0.8.1' = 
 // Azure Cosmos DB outputs
 output SUBSCRIPTION_ID string = subscription().subscriptionId
 output RESOURCE_GROUP string = resourceGroup().name
-output ACCOUNT_NAME string = cosmosDbAccount.outputs.name
 output LOCATION string = cosmosDbAccount.outputs.location
-output COSMOSDB_ENDPOINT string = cosmosDbAccount.outputs.endpoint
+output ACCOUNT_NAME string = cosmosDbAccount.outputs.name
+output ACCOUNT_ENDPOINT string = cosmosDbAccount.outputs.endpoint

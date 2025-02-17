@@ -1,33 +1,29 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: cosmos-db-nosql-dotnet-quickstart
+name: CosmicWorks
 metadata:
-  template: cosmos-db-nosql-dotnet-quickstart
-services:
-  web:
-    project: ./src/web
-    language: csharp
-    host: containerapp
-    docker:
-      path: ../Dockerfile
-      context: ../
+  template: CosmicWorks
 pipeline:
   provider: github
 hooks:
   postprovision:
     windows:
       run: |
-        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:ENDPOINT" "$env:CONFIGURATION__AZURECOSMOSDB__ENDPOINT" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
-        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:DATABASENAME" "$env:CONFIGURATION__AZURECOSMOSDB__DATABASENAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
-        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:CONTAINERNAME" "$env:CONFIGURATION__AZURECOSMOSDB__CONTAINERNAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+        dotnet user-secrets set "SUBSCRIPTION_ID" "$env:SUBSCRIPTION_ID" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "RESOURCE_GROUP" "$env:RESOURCE_GROUP" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "ACCOUNT_NAME" "$env:ACCOUNT_NAME" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "LOCATION" "$env:LOCATION" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "URI" "$env:URI" --project ./modeling-demos/modeling-demos.csproj
       shell: pwsh
       continueOnError: false
       interactive: true
     posix:
       run: |
-        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:ENDPOINT" "$CONFIGURATION__AZURECOSMOSDB__ENDPOINT" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
-        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:DATABASENAME" "$CONFIGURATION__AZURECOSMOSDB__DATABASENAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
-        dotnet user-secrets set "CONFIGURATION:AZURECOSMOSDB:CONTAINERNAME" "$CONFIGURATION__AZURECOSMOSDB__CONTAINERNAME" --project ./src/web/Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.csproj
+        dotnet user-secrets set "SUBSCRIPTION_ID" "$SUBSCRIPTION_ID" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "RESOURCE_GROUP" "$RESOURCE_GROUP" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "ACCOUNT_NAME" "$ACCOUNT_NAME" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "LOCATION" "$LOCATION" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "URI" "$URI" --project ./modeling-demos/modeling-demos.csproj
       shell: sh
       continueOnError: false
       interactive: true

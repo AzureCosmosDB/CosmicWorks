@@ -27,7 +27,7 @@ namespace modeling_demos
             .AddUserSecrets<Program>();
 
             var configuration = config.Build();
-            var uri = configuration["uri"];
+            var uri = configuration["ACCOUNT_ENDPOINT"];
 
             // Create the CosmosClient instance
             cosmosClient = new CosmosClient(uri, new DefaultAzureCredential());

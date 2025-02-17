@@ -8,7 +8,6 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /CosmicWorks
 COPY ["modeling-demos/modeling-demos.csproj", "modeling-demos/"]
 COPY ["models/models.csproj", "models/"]
-COPY ["change-feed-categories/change-feed-categories.csproj", "change-feed-categories/"]
 COPY ["cosmos-management/cosmos-management.csproj", "cosmos-management/"]
 COPY ["CosmicWorks.sln", "."]
 RUN dotnet restore "CosmicWorks.sln"
@@ -18,9 +17,8 @@ RUN dotnet build "CosmicWorks.sln" -c $BUILD_CONFIGURATION -o /app/build
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "modeling-demos/modeling-demos.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-RUN dotnet publish "change-feed-categories/change-feed-categories.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Microsoft.Samples.Cosmos.NoSQL.Quickstart.Web.dll"]
+ENTRYPOINT ["dotnet", "cosmos-management.dll"]
