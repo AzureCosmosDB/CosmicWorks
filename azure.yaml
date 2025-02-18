@@ -13,7 +13,7 @@ hooks:
         dotnet user-secrets set "RESOURCE_GROUP" "$env:RESOURCE_GROUP" --project ./src/CosmicWorks.csproj
         dotnet user-secrets set "ACCOUNT_NAME" "$env:ACCOUNT_NAME" --project ./src/CosmicWorks.csproj
         dotnet user-secrets set "LOCATION" "$env:LOCATION" --project ./src/CosmicWorks.csproj
-        dotnet user-secrets set "URI" "$env:URI" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_ENDPOINT" "$env:ACCOUNT_ENDPOINT" --project ./src/CosmicWorks.csproj
       shell: pwsh
       continueOnError: false
       interactive: true
@@ -23,7 +23,7 @@ hooks:
         dotnet user-secrets set "RESOURCE_GROUP" "$RESOURCE_GROUP" --project ./src/CosmicWorks.csproj
         dotnet user-secrets set "ACCOUNT_NAME" "$ACCOUNT_NAME" --project ./src/CosmicWorks.csproj
         dotnet user-secrets set "LOCATION" "$LOCATION" --project ./src/CosmicWorks.csproj
-        dotnet user-secrets set "URI" "$URI" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_ENDPOINT" "$ACCOUNT_ENDPOINT" --project ./src/CosmicWorks.csproj
       shell: sh
       continueOnError: false
       interactive: true
