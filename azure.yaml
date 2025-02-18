@@ -9,21 +9,21 @@ hooks:
   postprovision:
     windows:
       run: |
-        dotnet user-secrets set "SUBSCRIPTION_ID" "$env:SUBSCRIPTION_ID" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "RESOURCE_GROUP" "$env:RESOURCE_GROUP" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "ACCOUNT_NAME" "$env:ACCOUNT_NAME" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "LOCATION" "$env:LOCATION" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "URI" "$env:URI" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "SUBSCRIPTION_ID" "$env:SUBSCRIPTION_ID" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "RESOURCE_GROUP" "$env:RESOURCE_GROUP" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_NAME" "$env:ACCOUNT_NAME" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "LOCATION" "$env:LOCATION" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "URI" "$env:URI" --project ./src/CosmicWorks.csproj
       shell: pwsh
       continueOnError: false
       interactive: true
     posix:
       run: |
-        dotnet user-secrets set "SUBSCRIPTION_ID" "$SUBSCRIPTION_ID" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "RESOURCE_GROUP" "$RESOURCE_GROUP" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "ACCOUNT_NAME" "$ACCOUNT_NAME" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "LOCATION" "$LOCATION" --project ./modeling-demos/modeling-demos.csproj
-        dotnet user-secrets set "URI" "$URI" --project ./modeling-demos/modeling-demos.csproj
+        dotnet user-secrets set "SUBSCRIPTION_ID" "$SUBSCRIPTION_ID" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "RESOURCE_GROUP" "$RESOURCE_GROUP" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_NAME" "$ACCOUNT_NAME" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "LOCATION" "$LOCATION" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "URI" "$URI" --project ./src/CosmicWorks.csproj
       shell: sh
       continueOnError: false
       interactive: true
