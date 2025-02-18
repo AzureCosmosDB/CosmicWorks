@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CosmicWorks
@@ -44,6 +45,7 @@ namespace CosmicWorks
             
             //Get all databases
             AsyncPageable<CosmosDBSqlDatabaseResource> allDatabases = databases.GetAllAsync();
+
             
             //Delete all databases
             await foreach (CosmosDBSqlDatabaseResource database in allDatabases)
@@ -91,7 +93,7 @@ namespace CosmicWorks
             ArmOperation<CosmosDBSqlDatabaseResource> response = await databases.CreateOrUpdateAsync(WaitUntil.Completed, databaseName, properties);
             CosmosDBSqlDatabaseResource resource = response.Value;
 
-            Console.WriteLine($"Created new Database: {resource.Data.Id}");
+            Console.WriteLine($"Created new Database: {resource.Data.Name}");
 
         }
 
@@ -145,7 +147,7 @@ namespace CosmicWorks
             ArmOperation<CosmosDBSqlContainerResource> response = await cosmosContainers.CreateOrUpdateAsync(WaitUntil.Completed, containerName, properties);
             CosmosDBSqlContainerResource resource = response.Value;
 
-            Console.WriteLine($"Created new Container: {resource.Data.Id}");
+            Console.WriteLine($"Created new Container: {resource.Data.Name}");
         }
 
         public async Task ApplyCosmosRbacToAccount()
@@ -183,23 +185,26 @@ namespace CosmicWorks
             ArmOperation<CosmosDBSqlRoleAssignmentResource> response = await roleAssignment.UpdateAsync(WaitUntil.Completed, properties);
             CosmosDBSqlRoleAssignmentResource resource = response.Value;
 
-            Console.WriteLine($"Created new Role Assignment: {resource.Data.Id}");
+            Console.WriteLine($"Created new Role Assignment: {resource.Data.Name}");
         }
 
         private async Task<Guid?> GetCurrentUserPrincipalIdAsync()
         {
+            var tokenRequestContext = new TokenRequestContext(new[] { "https://management.azure.com/.default" });
+            var token = await _credential.GetTokenAsync(tokenRequestContext, CancellationToken.None);
 
-            // Get the principal Id of the current logged-in user
-            GraphServiceClient graphClient = new(_credential);
+            var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token.Token);
 
-            User user = await graphClient.Me.GetAsync();
+            // Extract 'oid' (Object ID / Principal ID)
+            if (jwtToken.Payload.TryGetValue("oid", out var oid))
+            {
+                string userId = oid.ToString()!;
+                Guid principalId = new (userId);
+                return principalId;
+            }
 
-            if (user == null || user.Id == null)
-                throw new InvalidOperationException("User or User ID is null.");
-
-            Guid principalId = new(user.Id);
-
-            return principalId;
+            return null;
 
         }
 

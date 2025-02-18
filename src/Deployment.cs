@@ -19,7 +19,13 @@ namespace CosmicWorks
 
         public static async Task DeleteAllDatabases(CosmosManagement management)
         {
+            Console.WriteLine("Deleting all databases...");
+            Console.ReadKey();
+            
             await management.DeleteAllCosmosDBDatabaes();
+            
+            Console.WriteLine("All databases deleted. Press any key to continue...");
+            Console.ReadKey();
             
         }
         
@@ -64,11 +70,16 @@ namespace CosmicWorks
             await management.CreateOrUpdateCosmosDBContainer("database-v4", "productMeta", "/type");
             await management.CreateOrUpdateCosmosDBContainer("database-v4", "salesByCategory", "/categoryId");
             
+            Console.WriteLine("All databases and container recreated. You can now load data. Press any key to continue...");
+            Console.ReadLine();
         }
 
 
         public static async Task LoadData(CosmosClient cosmosDBClient, bool force = false, int? schemaVersion = null)
         {
+
+            //start a timer
+            var watch = System.Diagnostics.Stopwatch.StartNew();
 
             await GetFilesFromRepo("database-v1", force);
             await GetFilesFromRepo("database-v2", force);
@@ -85,6 +96,12 @@ namespace CosmicWorks
 
             cosmosDBClient.ClientOptions.AllowBulkExecution = false;
             cosmosDBClient.ClientOptions.EnableContentResponseOnWrite = true;
+
+            watch.Stop();
+            Console.WriteLine($"Data load completed in {watch.Elapsed.Minutes}m {watch.Elapsed.Seconds}s");
+
+            Console.WriteLine("Press any key to continue");
+            Console.ReadLine();
 
         }
 
