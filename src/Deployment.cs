@@ -31,9 +31,10 @@ namespace CosmicWorks
         public static async Task CreateDatabaseAndContainers(CosmosManagement management)
         {
 
+            Console.WriteLine($"Creating Cosmos NoSQL RBAC on databases and containers");
             await management.ApplyCosmosRbacToAccount();
 
-            Console.WriteLine($"Creating database and containers for schema database-v1");
+            Console.WriteLine($"Creating database and containers for database-v1");
             await management.CreateOrUpdateCosmosDBDatabase("database-v1");
             await management.CreateOrUpdateCosmosDBContainer("database-v1", "customer", "/id");
             await management.CreateOrUpdateCosmosDBContainer("database-v1", "customerAddress", "/id");
@@ -45,7 +46,7 @@ namespace CosmicWorks
             await management.CreateOrUpdateCosmosDBContainer("database-v1", "salesOrder", "/id");
             await management.CreateOrUpdateCosmosDBContainer("database-v1", "salesOrderDetail", "/id");
 
-            Console.WriteLine($"Creating database and containers for schema database-v2");
+            Console.WriteLine($"Creating database and containers for database-v2");
             await management.CreateOrUpdateCosmosDBDatabase("database-v2");
             await management.CreateOrUpdateCosmosDBContainer("database-v2", "customer", "/id");
             await management.CreateOrUpdateCosmosDBContainer("database-v2", "product", "/categoryId");
@@ -53,7 +54,7 @@ namespace CosmicWorks
             await management.CreateOrUpdateCosmosDBContainer("database-v2", "productTag", "/type");
             await management.CreateOrUpdateCosmosDBContainer("database-v2", "salesOrder", "/customerId");
 
-            Console.WriteLine($"Creating database and containers for schema database-v3");
+            Console.WriteLine($"Creating database and containers for database-v3");
             await management.CreateOrUpdateCosmosDBDatabase("database-v3");
             await management.CreateOrUpdateCosmosDBContainer("database-v3", "leases", "/id");
             await management.CreateOrUpdateCosmosDBContainer("database-v3", "customer", "/id");
@@ -62,7 +63,7 @@ namespace CosmicWorks
             await management.CreateOrUpdateCosmosDBContainer("database-v3", "productTag", "/type");
             await management.CreateOrUpdateCosmosDBContainer("database-v3", "salesOrder", "/customerId");
 
-            Console.WriteLine($"Creating database and containers for schema database-v4");
+            Console.WriteLine($"Creating database and containers for database-v4");
             await management.CreateOrUpdateCosmosDBDatabase("database-v4");
             await management.CreateOrUpdateCosmosDBContainer("database-v4", "customer", "/customerId");
             await management.CreateOrUpdateCosmosDBContainer("database-v4", "product", "/categoryId");
