@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: CosmicWorks
+metadata:
+  template: CosmicWorks
+pipeline:
+  provider: github
+hooks:
+  postprovision:
+    windows:
+      run: |
+        dotnet user-secrets set "SUBSCRIPTION_ID" "$env:SUBSCRIPTION_ID" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "RESOURCE_GROUP" "$env:RESOURCE_GROUP" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_NAME" "$env:ACCOUNT_NAME" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "LOCATION" "$env:LOCATION" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_ENDPOINT" "$env:ACCOUNT_ENDPOINT" --project ./src/CosmicWorks.csproj
+      shell: pwsh
+      continueOnError: false
+      interactive: true
+    posix:
+      run: |
+        dotnet user-secrets set "SUBSCRIPTION_ID" "$SUBSCRIPTION_ID" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "RESOURCE_GROUP" "$RESOURCE_GROUP" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_NAME" "$ACCOUNT_NAME" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "LOCATION" "$LOCATION" --project ./src/CosmicWorks.csproj
+        dotnet user-secrets set "ACCOUNT_ENDPOINT" "$ACCOUNT_ENDPOINT" --project ./src/CosmicWorks.csproj
+      shell: sh
+      continueOnError: false
+      interactive: true
