@@ -51,7 +51,7 @@ namespace CosmicWorks
             await foreach (CosmosDBSqlDatabaseResource database in allDatabases)
             {
                 await database.DeleteAsync(WaitUntil.Completed);
-                Console.WriteLine($"Deleted Database: {database.Data.Id}");
+                Console.WriteLine($"Deleted Database: {database.Data.Name}");
             }
         }
 

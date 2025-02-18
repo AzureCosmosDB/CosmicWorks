@@ -20,7 +20,6 @@ namespace CosmicWorks
         public static async Task DeleteAllDatabases(CosmosManagement management)
         {
             Console.WriteLine("Deleting all databases...");
-            Console.ReadKey();
             
             await management.DeleteAllCosmosDBDatabaes();
             
