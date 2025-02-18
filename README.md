@@ -39,10 +39,13 @@ This sample uploads a large amount of data. If you have slow upload speeds such 
 1. Create a new Codespace for this repository.
 1. Open a terminal, type azd auth login. 
 1. Type `azd up` and deploy the Cosmos resources. (This is a serverless account so there is no cost to create these resources.)
-1. When the deployment is complete, type `dotnet run` in the terminal to start the application.
+1. When the deployment is complete, navigate to workspaces/CosmicWorks/src folder by typing `cd src`.
+1. Then type `dotnet run` in the terminal to start the application.
+    1. You may want to make the terminal larger on your screen by dragging it up or clicking the up carrot to maximize the terminal panel.
 1. On the main menu, press 'k' to load the data. 
     1. This will take some time to run and you will see retries as it will ingest data faster than Serverless accounts allow for.
-1. After the data is loaded, return to Visual Studio, put any breakpoints for any of the functions you want to step through.
+    1. After the data is loaded, if you want to run this solution locally, follow the steps to Run Locally. In Visual Studio, open secrets.json and copy and paste the values from the env file in .azure folder into secrets.json so the app can connect to the deployed Cosmos DB account.
+1. After the data is loaded, open Program.cs and put any breakpoints for any of the functions you want to step through.
 1. Press F5 to start a debug session.
 
 > [!IMPORTANT]
