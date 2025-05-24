@@ -212,6 +212,37 @@ namespace modeling_demos
 
         }
 
+        private static async Task<ItemResponse<dynamic>> CreateItemWithRetryAsync(Container container, dynamic item)
+        {
+            int maxRetries = 10;
+            int retryCount = 0;
+            
+            while (true)
+            {
+                try
+                {
+                    return await container.CreateItemAsync(item);
+                }
+                catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests && retryCount < maxRetries)
+                {
+                    retryCount++;
+                    
+                    // Extract retry-after value from response headers (in milliseconds)
+                    if (ex.Headers.TryGetValue("x-ms-retry-after-ms", out var retryAfterMs) && 
+                        int.TryParse(retryAfterMs, out var delayMs))
+                    {
+                        Console.WriteLine($"    Received 429 error, retrying after {delayMs}ms (Retry: {retryCount}/{maxRetries})");
+                        await Task.Delay(delayMs);
+                    }
+                    else
+                    {
+                        // Default delay if header not present or invalid
+                        await Task.Delay(1000);
+                    }
+                }
+            }
+        }
+
         private static async Task LoadContainerFromFile(Container container, string file, Boolean noBulk = false)
         {
             using (StreamReader streamReader = new StreamReader(file))
@@ -232,11 +263,12 @@ namespace modeling_demos
                 {
                     if (usebulk)
                     {
-                        concurrentTasks.Add(container.CreateItemAsync(record));
+                        concurrentTasks.Add(CreateItemWithRetryAsync(container, record));
                     }
                     else
                     {
-                        container.CreateItemAsync(record);
+                        // For non-bulk mode, still use retry mechanism
+                        await CreateItemWithRetryAsync(container, record);
                     }
                     batchCounter++;
                     if (batchCounter >= maxConcurrentTasks)
