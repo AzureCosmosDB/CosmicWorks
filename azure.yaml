@@ -1,0 +1,59 @@
+name: cosmicworks
+metadata:
+  template: cosmicworks@0.0.1
+services:
+  cosmosdb:
+    project: ./infra
+    language: bicep
+    host: azure
+    hooks:
+      postdeploy:
+        shell: pwsh
+        run: |
+          # Get the Cosmos DB endpoint from bicep output
+          $cosmosdbEndpoint = $env:AZURE_COSMOSDB_ENDPOINT
+          Write-Host "Setting up appsettings.development.json with CosmosDB endpoint: $cosmosdbEndpoint"
+          
+          # Create the content for appsettings.development.json
+          $appSettingsContent = @{
+            uri = $cosmosdbEndpoint
+          } | ConvertTo-Json
+          
+          # Define paths for modeling-demos and change-feed-categories projects
+          $projectPaths = @(
+            "./modeling-demos",
+            "./change-feed-categories"
+          )
+          
+          # Create appsettings.development.json for each project
+          foreach ($projectPath in $projectPaths) {
+            $appSettingsPath = "$projectPath/appsettings.development.json"
+            
+            # Create directory if it doesn't exist
+            if (-not (Test-Path $projectPath)) {
+              New-Item -ItemType Directory -Path $projectPath -Force
+            }
+            
+            # Write settings file
+            Set-Content -Path $appSettingsPath -Value $appSettingsContent
+            Write-Host "Created appsettings.development.json in $projectPath"
+          }
+          
+          Write-Host "Successfully created appsettings.development.json files."
+capabilities:
+  cosmos: {}
+hooks:
+  postprovision:
+    shell: pwsh
+    run: |
+      Write-Host "Cosmos DB deployment completed!"
+policies:
+  resources:
+    cosmos:
+      resources:
+        database:
+          effect: audit
+        sqldb:
+          effect: audit
+        container:
+          effect: audit

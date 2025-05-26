@@ -1,0 +1,611 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.35.1.17967",
+      "templateHash": "10816995961974509720"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "namePrefix": {
+      "type": "string"
+    },
+    "uniqueSuffix": {
+      "type": "string"
+    },
+    "managedIdentityPrincipalId": {
+      "type": "string"
+    },
+    "currentUserPrincipalId": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "cosmosDBAccountName": "[format('{0}-db-{1}', parameters('namePrefix'), parameters('uniqueSuffix'))]",
+    "cosmosDataContributorRoleId": "00000000-8000-0000-0000-000000000002"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2023-04-15",
+      "name": "[variables('cosmosDBAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "GlobalDocumentDB",
+      "properties": {
+        "enableFreeTier": false,
+        "databaseAccountOfferType": "Standard",
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session"
+        },
+        "locations": [
+          {
+            "locationName": "[parameters('location')]",
+            "failoverPriority": 0,
+            "isZoneRedundant": false
+          }
+        ],
+        "capabilities": [
+          {
+            "name": "EnableServerless"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}', variables('cosmosDBAccountName'), 'database-v1')]",
+      "properties": {
+        "resource": {
+          "id": "database-v1"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'customer')]",
+      "properties": {
+        "resource": {
+          "id": "customer",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'customerAddress')]",
+      "properties": {
+        "resource": {
+          "id": "customerAddress",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'customerPassword')]",
+      "properties": {
+        "resource": {
+          "id": "customerPassword",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'product')]",
+      "properties": {
+        "resource": {
+          "id": "product",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'productCategory')]",
+      "properties": {
+        "resource": {
+          "id": "productCategory",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'productTag')]",
+      "properties": {
+        "resource": {
+          "id": "productTag",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'productTags')]",
+      "properties": {
+        "resource": {
+          "id": "productTags",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'salesOrder')]",
+      "properties": {
+        "resource": {
+          "id": "salesOrder",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v1', 'salesOrderDetail')]",
+      "properties": {
+        "resource": {
+          "id": "salesOrderDetail",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v1')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}', variables('cosmosDBAccountName'), 'database-v2')]",
+      "properties": {
+        "resource": {
+          "id": "database-v2"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v2', 'customer')]",
+      "properties": {
+        "resource": {
+          "id": "customer",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v2')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v2', 'product')]",
+      "properties": {
+        "resource": {
+          "id": "product",
+          "partitionKey": {
+            "paths": [
+              "/categoryId"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v2')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v2', 'productCategory')]",
+      "properties": {
+        "resource": {
+          "id": "productCategory",
+          "partitionKey": {
+            "paths": [
+              "/type"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v2')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v2', 'productTag')]",
+      "properties": {
+        "resource": {
+          "id": "productTag",
+          "partitionKey": {
+            "paths": [
+              "/type"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v2')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v2', 'salesOrder')]",
+      "properties": {
+        "resource": {
+          "id": "salesOrder",
+          "partitionKey": {
+            "paths": [
+              "/customerId"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v2')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}', variables('cosmosDBAccountName'), 'database-v3')]",
+      "properties": {
+        "resource": {
+          "id": "database-v3"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v3', 'customer')]",
+      "properties": {
+        "resource": {
+          "id": "customer",
+          "partitionKey": {
+            "paths": [
+              "/id"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v3')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v3', 'product')]",
+      "properties": {
+        "resource": {
+          "id": "product",
+          "partitionKey": {
+            "paths": [
+              "/categoryId"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v3')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v3', 'productCategory')]",
+      "properties": {
+        "resource": {
+          "id": "productCategory",
+          "partitionKey": {
+            "paths": [
+              "/type"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v3')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v3', 'productTag')]",
+      "properties": {
+        "resource": {
+          "id": "productTag",
+          "partitionKey": {
+            "paths": [
+              "/type"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v3')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v3', 'salesOrder')]",
+      "properties": {
+        "resource": {
+          "id": "salesOrder",
+          "partitionKey": {
+            "paths": [
+              "/customerId"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v3')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}', variables('cosmosDBAccountName'), 'database-v4')]",
+      "properties": {
+        "resource": {
+          "id": "database-v4"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v4', 'customer')]",
+      "properties": {
+        "resource": {
+          "id": "customer",
+          "partitionKey": {
+            "paths": [
+              "/customerId"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v4')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v4', 'product')]",
+      "properties": {
+        "resource": {
+          "id": "product",
+          "partitionKey": {
+            "paths": [
+              "/categoryId"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v4')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v4', 'productMeta')]",
+      "properties": {
+        "resource": {
+          "id": "productMeta",
+          "partitionKey": {
+            "paths": [
+              "/type"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v4')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}/{2}', variables('cosmosDBAccountName'), 'database-v4', 'salesByCategory')]",
+      "properties": {
+        "resource": {
+          "id": "salesByCategory",
+          "partitionKey": {
+            "paths": [
+              "/categoryId"
+            ],
+            "kind": "Hash",
+            "version": 2
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosDBAccountName'), 'database-v4')]"
+      ]
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}', variables('cosmosDBAccountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName')), parameters('managedIdentityPrincipalId'), variables('cosmosDataContributorRoleId')))]",
+      "properties": {
+        "principalId": "[parameters('managedIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', variables('cosmosDBAccountName'), variables('cosmosDataContributorRoleId'))]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      ]
+    },
+    {
+      "condition": "[not(equals(parameters('currentUserPrincipalId'), '00000000-0000-0000-0000-000000000000'))]",
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2023-04-15",
+      "name": "[format('{0}/{1}', variables('cosmosDBAccountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName')), parameters('currentUserPrincipalId'), variables('cosmosDataContributorRoleId')))]",
+      "properties": {
+        "principalId": "[parameters('currentUserPrincipalId')]",
+        "principalType": "User",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', variables('cosmosDBAccountName'), variables('cosmosDataContributorRoleId'))]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "cosmosDbEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDBAccountName')), '2023-04-15').documentEndpoint]"
+    },
+    "cosmosDbName": {
+      "type": "string",
+      "value": "[variables('cosmosDBAccountName')]"
+    }
+  }
+}
