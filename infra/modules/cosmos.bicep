@@ -476,6 +476,90 @@ resource productMetaV4Container 'Microsoft.DocumentDB/databaseAccounts/sqlDataba
   }
 }
 
+// Database v5 - Advanced Features Showcase
+resource databaseV5 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-11-15' = {
+  parent: cosmosAccount
+  name: 'database-v5'
+  properties: {
+    resource: {
+      id: 'database-v5'
+    }
+  }
+}
+
+// Database v5 Containers with Advanced Features
+// Customer container demonstrating hierarchical partitioning concepts
+resource customerV5Container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  parent: databaseV5
+  name: 'customer'
+  properties: {
+    resource: {
+      id: 'customer'
+      partitionKey: {
+        paths: [
+          '/region'
+        ]
+        kind: 'Hash'
+        version: 2
+      }
+    }
+  }
+}
+
+// Product container demonstrating efficient category-based partitioning
+resource productV5Container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  parent: databaseV5
+  name: 'product'
+  properties: {
+    resource: {
+      id: 'product'
+      partitionKey: {
+        paths: [
+          '/categoryId'
+        ]
+        kind: 'Hash'
+        version: 2
+      }
+    }
+  }
+}
+
+// Sales Order container with regional partitioning for efficient queries
+resource salesOrderV5Container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  parent: databaseV5
+  name: 'salesOrder'
+  properties: {
+    resource: {
+      id: 'salesOrder'
+      partitionKey: {
+        paths: [
+          '/region'
+        ]
+        kind: 'Hash'
+        version: 2
+      }
+    }
+  }
+}
+
+// Leases container for change feed processing
+resource leasesV5Container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  parent: databaseV5
+  name: 'leases'
+  properties: {
+    resource: {
+      id: 'leases'
+      partitionKey: {
+        paths: [
+          '/id'
+        ]
+        kind: 'Hash'
+        version: 2
+      }
+    }
+  }
+}
+
 
 // Role assignments
 resource managedIdentityRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = {

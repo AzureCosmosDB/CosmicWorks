@@ -17,6 +17,7 @@ namespace CosmicWorks
             await LoadContainersFromGitHub(cosmosDBClient, "database-v2");
             await LoadContainersFromGitHub(cosmosDBClient, "database-v3");
             await LoadContainersFromGitHub(cosmosDBClient, "database-v4");
+            await LoadContainersFromGitHub(cosmosDBClient, "database-v5");
         }
 
         private static async Task LoadContainersFromGitHub(CosmosClient client, string databaseName)

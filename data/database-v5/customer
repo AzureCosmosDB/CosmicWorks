@@ -1,0 +1,126 @@
+[
+    {
+        "id": "CUSTOMER-001",
+        "type": "customer",
+        "customerId": "CUSTOMER-001",
+        "region": "North America",
+        "title": "Mr.",
+        "firstName": "John",
+        "lastName": "Smith",
+        "emailAddress": "john.smith@adventure-works.com",
+        "phoneNumber": "555-0101",
+        "creationDate": "2023-01-15T00:00:00Z",
+        "addresses": [
+            {
+                "addressLine1": "123 Main Street",
+                "addressLine2": "Apt 101",
+                "city": "Seattle",
+                "state": "WA",
+                "country": "USA",
+                "zipCode": "98101",
+                "location": {
+                    "type": "Point",
+                    "coordinates": [-122.3328, 47.6061]
+                }
+            }
+        ],
+        "password": {
+            "hash": "hash123",
+            "salt": "salt123"
+        },
+        "salesOrderCount": 5
+    },
+    {
+        "id": "CUSTOMER-002", 
+        "type": "customer",
+        "customerId": "CUSTOMER-002",
+        "region": "Europe",
+        "title": "Ms.",
+        "firstName": "Sarah",
+        "lastName": "Johnson",
+        "emailAddress": "sarah.johnson@adventure-works.com",
+        "phoneNumber": "555-0102",
+        "creationDate": "2023-02-10T00:00:00Z",
+        "addresses": [
+            {
+                "addressLine1": "456 Oak Avenue",
+                "addressLine2": "",
+                "city": "London",
+                "state": "",
+                "country": "UK",
+                "zipCode": "SW1A 1AA",
+                "location": {
+                    "type": "Point",
+                    "coordinates": [-0.1276, 51.5074]
+                }
+            }
+        ],
+        "password": {
+            "hash": "hash456", 
+            "salt": "salt456"
+        },
+        "salesOrderCount": 8
+    },
+    {
+        "id": "CUSTOMER-003",
+        "type": "customer", 
+        "customerId": "CUSTOMER-003",
+        "region": "Asia Pacific",
+        "title": "Dr.",
+        "firstName": "Hiroshi",
+        "lastName": "Tanaka",
+        "emailAddress": "hiroshi.tanaka@adventure-works.com",
+        "phoneNumber": "555-0103",
+        "creationDate": "2023-03-05T00:00:00Z",
+        "addresses": [
+            {
+                "addressLine1": "789 Cherry Blossom Street",
+                "addressLine2": "Building 2, Floor 5",
+                "city": "Tokyo",
+                "state": "",
+                "country": "Japan",
+                "zipCode": "100-0001",
+                "location": {
+                    "type": "Point",
+                    "coordinates": [139.6917, 35.6895]
+                }
+            }
+        ],
+        "password": {
+            "hash": "hash789",
+            "salt": "salt789"
+        },
+        "salesOrderCount": 12
+    },
+    {
+        "id": "CUSTOMER-004",
+        "type": "customer",
+        "customerId": "CUSTOMER-004", 
+        "region": "North America",
+        "title": "Mrs.",
+        "firstName": "Maria",
+        "lastName": "Garcia",
+        "emailAddress": "maria.garcia@adventure-works.com",
+        "phoneNumber": "555-0104",
+        "creationDate": "2023-04-20T00:00:00Z",
+        "addresses": [
+            {
+                "addressLine1": "321 Sunset Boulevard",
+                "addressLine2": "Suite 200",
+                "city": "Los Angeles",
+                "state": "CA",
+                "country": "USA",
+                "zipCode": "90028",
+                "location": {
+                    "type": "Point",
+                    "coordinates": [-118.2437, 34.0522]
+                }
+            }
+        ],
+        "password": {
+            "hash": "hash321",
+            "salt": "salt321"
+        },
+        "salesOrderCount": 3
+    }
+]

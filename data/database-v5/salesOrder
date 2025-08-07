@@ -1,0 +1,112 @@
+[
+    {
+        "id": "ORDER-001",
+        "type": "salesOrder",
+        "customerId": "CUSTOMER-001",
+        "region": "North America",
+        "orderDate": "2023-10-15T10:30:00Z",
+        "shipDate": "2023-10-16T09:00:00Z",
+        "details": [
+            {
+                "sku": "MTB-001",
+                "name": "Mountain Explorer Pro",
+                "price": 1299.99,
+                "quantity": 1
+            },
+            {
+                "sku": "HLM-001", 
+                "name": "AeroSafe Pro Helmet",
+                "price": 79.99,
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "id": "ORDER-002",
+        "type": "salesOrder",
+        "customerId": "CUSTOMER-002",
+        "region": "Europe",
+        "orderDate": "2023-10-20T14:15:00Z",
+        "shipDate": "2023-10-21T11:30:00Z",
+        "details": [
+            {
+                "sku": "RDB-001",
+                "name": "Speed Demon Carbon",
+                "price": 2499.99,
+                "quantity": 1
+            },
+            {
+                "sku": "WHL-001",
+                "name": "Carbon Fiber Wheelset", 
+                "price": 899.99,
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "id": "ORDER-003",
+        "type": "salesOrder",
+        "customerId": "CUSTOMER-003", 
+        "region": "Asia Pacific",
+        "orderDate": "2023-11-01T08:45:00Z",
+        "shipDate": "2023-11-02T16:20:00Z",
+        "details": [
+            {
+                "sku": "LGT-001",
+                "name": "UltraBright LED Set",
+                "price": 45.99,
+                "quantity": 2
+            },
+            {
+                "sku": "BRK-001",
+                "name": "Hydraulic Disc Brake Set",
+                "price": 299.99,
+                "quantity": 1
+            }
+        ]
+    },
+    {
+        "id": "ORDER-004",
+        "type": "salesOrder",
+        "customerId": "CUSTOMER-001",
+        "region": "North America", 
+        "orderDate": "2023-11-05T13:20:00Z",
+        "shipDate": "2023-11-06T10:15:00Z",
+        "details": [
+            {
+                "sku": "HLM-001",
+                "name": "AeroSafe Pro Helmet",
+                "price": 79.99,
+                "quantity": 2
+            }
+        ]
+    },
+    {
+        "id": "ORDER-005",
+        "type": "salesOrder",
+        "customerId": "CUSTOMER-004",
+        "region": "North America",
+        "orderDate": "2023-11-10T16:45:00Z", 
+        "shipDate": "2023-11-11T12:30:00Z",
+        "details": [
+            {
+                "sku": "MTB-001",
+                "name": "Mountain Explorer Pro",
+                "price": 1299.99,
+                "quantity": 1
+            },
+            {
+                "sku": "LGT-001",
+                "name": "UltraBright LED Set",
+                "price": 45.99,
+                "quantity": 1
+            },
+            {
+                "sku": "BRK-001",
+                "name": "Hydraulic Disc Brake Set",
+                "price": 299.99,
+                "quantity": 1
+            }
+        ]
+    }
+]

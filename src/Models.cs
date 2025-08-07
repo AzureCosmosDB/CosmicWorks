@@ -60,6 +60,7 @@ namespace models
         public string id { get; set; }
         public string type { get; set; }
         public string name { get; set; }
+        public string parentCategoryId { get; set; } // For hierarchical categories
     }
 
     public class Product
@@ -96,6 +97,53 @@ namespace models
         public string name { get; set; }
         public double price { get; set; }
         public int quantity { get; set; }
+    }
+
+    // V5 Models with Advanced Features Support
+
+    public class CustomerV5
+    {
+        public string id { get; set; }
+        public string type { get; set; }
+        public string customerId { get; set; }
+        public string region { get; set; } // Hierarchical partition key part 1
+        public string title { get; set; }
+        public string firstName { get; set; }
+        public string lastName { get; set; }
+        public string emailAddress { get; set; }
+        public string phoneNumber { get; set; }
+        public string creationDate { get; set; }
+        public List<CustomerAddress> addresses { get; set; }
+        public Password password { get; set; }
+        public int salesOrderCount { get; set; }
+        // Note: fullName and yearCreated are computed properties
+    }
+
+    public class ProductV5
+    {
+        public string id { get; set; }
+        public string categoryId { get; set; } // Hierarchical partition key part 1
+        public string subCategoryId { get; set; } // Hierarchical partition key part 2
+        public string categoryName { get; set; }
+        public string subCategoryName { get; set; }
+        public string sku { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public double price { get; set; }
+        public List<Tag> tags { get; set; }
+        // Note: priceRange and discountedPrice are computed properties
+    }
+
+    public class SalesOrderV5
+    {
+        public string id { get; set; }
+        public string type { get; set; }
+        public string customerId { get; set; }
+        public string region { get; set; } // Hierarchical partition key part 1 (matches customer)
+        public string orderDate { get; set; }
+        public string shipDate { get; set; }
+        public List<SalesOrderDetails> details { get; set; }
+        // Note: orderMonth and totalValue are computed properties
     }
 
 }

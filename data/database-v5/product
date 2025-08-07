@@ -1,0 +1,128 @@
+[
+    {
+        "id": "PRODUCT-001",
+        "categoryId": "BIKES",
+        "subCategoryId": "MOUNTAIN",
+        "categoryName": "Bikes",
+        "subCategoryName": "Mountain Bikes",
+        "sku": "MTB-001",
+        "name": "Mountain Explorer Pro",
+        "description": "Professional mountain bike for extreme terrains",
+        "price": 1299.99,
+        "tags": [
+            {
+                "id": "TAG-001",
+                "name": "Professional"
+            },
+            {
+                "id": "TAG-002", 
+                "name": "Mountain"
+            }
+        ]
+    },
+    {
+        "id": "PRODUCT-002",
+        "categoryId": "BIKES",
+        "subCategoryId": "ROAD",
+        "categoryName": "Bikes",
+        "subCategoryName": "Road Bikes",
+        "sku": "RDB-001",
+        "name": "Speed Demon Carbon",
+        "description": "Ultra-lightweight carbon fiber road bike",
+        "price": 2499.99,
+        "tags": [
+            {
+                "id": "TAG-003",
+                "name": "Carbon"
+            },
+            {
+                "id": "TAG-004",
+                "name": "Lightweight"
+            }
+        ]
+    },
+    {
+        "id": "PRODUCT-003",
+        "categoryId": "ACCESSORIES",
+        "subCategoryId": "HELMETS",
+        "categoryName": "Accessories",
+        "subCategoryName": "Safety Helmets",
+        "sku": "HLM-001",
+        "name": "AeroSafe Pro Helmet",
+        "description": "Professional cycling helmet with advanced ventilation",
+        "price": 79.99,
+        "tags": [
+            {
+                "id": "TAG-005",
+                "name": "Safety"
+            },
+            {
+                "id": "TAG-006",
+                "name": "Ventilation"
+            }
+        ]
+    },
+    {
+        "id": "PRODUCT-004",
+        "categoryId": "ACCESSORIES",
+        "subCategoryId": "LIGHTS",
+        "categoryName": "Accessories", 
+        "subCategoryName": "Bike Lights",
+        "sku": "LGT-001",
+        "name": "UltraBright LED Set",
+        "description": "High-intensity LED front and rear light set",
+        "price": 45.99,
+        "tags": [
+            {
+                "id": "TAG-007",
+                "name": "LED"
+            },
+            {
+                "id": "TAG-008",
+                "name": "Safety"
+            }
+        ]
+    },
+    {
+        "id": "PRODUCT-005",
+        "categoryId": "COMPONENTS",
+        "subCategoryId": "WHEELS",
+        "categoryName": "Components",
+        "subCategoryName": "Wheels & Tires",
+        "sku": "WHL-001",
+        "name": "Carbon Fiber Wheelset",
+        "description": "Lightweight carbon fiber wheelset for road bikes",
+        "price": 899.99,
+        "tags": [
+            {
+                "id": "TAG-009",
+                "name": "Carbon"
+            },
+            {
+                "id": "TAG-010",
+                "name": "Performance"
+            }
+        ]
+    },
+    {
+        "id": "PRODUCT-006",
+        "categoryId": "COMPONENTS",
+        "subCategoryId": "BRAKES",
+        "categoryName": "Components",
+        "subCategoryName": "Brake Systems", 
+        "sku": "BRK-001",
+        "name": "Hydraulic Disc Brake Set",
+        "description": "Professional hydraulic disc brake system",
+        "price": 299.99,
+        "tags": [
+            {
+                "id": "TAG-011",
+                "name": "Hydraulic"
+            },
+            {
+                "id": "TAG-012",
+                "name": "Precision"
+            }
+        ]
+    }
+]

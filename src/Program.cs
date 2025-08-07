@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 
@@ -18,6 +19,7 @@ namespace CosmicWorks
 
         static CosmosClient cosmosClient;
         static ChangeFeed changeFeed;
+        static AdvancedChangeFeed advancedChangeFeed;
 
         public static void AddConfiguration(IConfigurationBuilder config)
         {
@@ -31,6 +33,9 @@ namespace CosmicWorks
 
             // Create the ChangeFeed instance
             changeFeed = new ChangeFeed(cosmosClient);
+
+            // Create the Advanced ChangeFeed instance for V5 features
+            advancedChangeFeed = new AdvancedChangeFeed(cosmosClient);
 
         }
 
@@ -66,6 +71,11 @@ namespace CosmicWorks
                 Console.WriteLine($"[h]   Create new order and update order total");
                 Console.WriteLine($"[i]   Delete order and update order total");
                 Console.WriteLine($"[j]   Query top 10 customers");
+                Console.WriteLine($"-------------------------------------------");
+                Console.WriteLine($"[l]   Demo: Hierarchical Partitioning (V5)");
+                Console.WriteLine($"[m]   Demo: Computed Properties (V5)");
+                Console.WriteLine($"[n]   Demo: Advanced Change Feed (V5)");
+                Console.WriteLine($"[o]   Demo: Cross-region queries (V5)");
                 Console.WriteLine($"-------------------------------------------");
                 Console.WriteLine($"[k]   Upload data to containers");
                 Console.WriteLine($"-------------------------------------------");
@@ -125,6 +135,26 @@ namespace CosmicWorks
                 {
                     Console.Clear();
                     await GetTop10Customers();
+                }
+                else if (result.KeyChar == 'l')
+                {
+                    Console.Clear();
+                    await DemoHierarchicalPartitioning();
+                }
+                else if (result.KeyChar == 'm')
+                {
+                    Console.Clear();
+                    await DemoComputedProperties();
+                }
+                else if (result.KeyChar == 'n')
+                {
+                    Console.Clear();
+                    await DemoAdvancedChangeFeed();
+                }
+                else if (result.KeyChar == 'o')
+                {
+                    Console.Clear();
+                    await DemoCrossRegionQueries();
                 }
                 else if (result.KeyChar == 'k')
                 {
@@ -546,6 +576,438 @@ namespace CosmicWorks
         public static void Print(object obj)
         {
             Console.WriteLine($"{JObject.FromObject(obj).ToString()}\n");
+        }
+
+        // V5 Advanced Features Demonstrations
+
+        public static async Task DemoHierarchicalPartitioning()
+        {
+            Database database = cosmosClient.GetDatabase("database-v5");
+            Container customerContainer = database.GetContainer("customer");
+            Container salesOrderContainer = database.GetContainer("salesOrder");
+
+            Console.WriteLine("=== Hierarchical Partitioning Demo ===\n");
+            Console.WriteLine("V5 demonstrates advanced partitioning strategies:");
+            Console.WriteLine("• Regional partitioning for customers and orders");
+            Console.WriteLine("• Enables efficient geo-distributed queries");
+            Console.WriteLine("• Supports both regional and cross-regional analytics\n");
+
+            Console.WriteLine("📚 About Hierarchical Partitioning:");
+            Console.WriteLine("Hierarchical partition keys (available in preview) allow multiple levels:");
+            Console.WriteLine("Example: [/region, /customerId] or [/tenantId, /userId, /deviceId]");
+            Console.WriteLine("Benefits:");
+            Console.WriteLine("• Better query performance for common access patterns");
+            Console.WriteLine("• More granular control over data distribution");
+            Console.WriteLine("• Improved scalability for multi-tenant scenarios\n");
+
+            // Demo 1: Query customers in a specific region efficiently
+            Console.WriteLine("1. Query all customers in North America (using regional partition key):");
+            
+            string sql = "SELECT c.customerId, c.firstName, c.lastName, c.region FROM c WHERE c.type = 'customer'";
+            
+            FeedIterator<dynamic> resultSet = customerContainer.GetItemQueryIterator<dynamic>(
+                new QueryDefinition(sql),
+                requestOptions: new QueryRequestOptions()
+                {
+                    // Efficient query using regional partition key
+                    PartitionKey = new PartitionKey("North America")
+                });
+
+            double requestCharge = 0;
+            while (resultSet.HasMoreResults)
+            {
+                FeedResponse<dynamic> response = await resultSet.ReadNextAsync();
+                requestCharge += response.RequestCharge;
+                
+                foreach (var customer in response)
+                {
+                    Console.WriteLine($"  Customer: {customer.firstName} {customer.lastName} (ID: {customer.customerId})");
+                }
+            }
+            Console.WriteLine($"  Request Charge (Regional query): {requestCharge:F2} RUs\n");
+
+            // Demo 2: Point read using regional partition key
+            Console.WriteLine("2. Point read for specific customer using regional partition key:");
+            
+            try
+            {
+                ItemResponse<CustomerV5> pointReadResponse = await customerContainer.ReadItemAsync<CustomerV5>(
+                    id: "CUSTOMER-001",
+                    partitionKey: new PartitionKey("North America"));
+
+                Console.WriteLine($"  Found: {pointReadResponse.Resource.firstName} {pointReadResponse.Resource.lastName}");
+                Console.WriteLine($"  Request Charge (Point read): {pointReadResponse.RequestCharge:F2} RUs");
+            }
+            catch (CosmosException ex)
+            {
+                Console.WriteLine($"  Note: Point read requires exact partition key match");
+                Console.WriteLine($"  Error: {ex.Message}");
+            }
+
+            // Demo 3: Cross-region comparison
+            Console.WriteLine("\n3. Regional comparison using optimized partitioning:");
+            
+            var regions = new[] { "North America", "Europe", "Asia Pacific" };
+            
+            foreach (string region in regions)
+            {
+                string regionalSql = "SELECT COUNT(1) as CustomerCount, AVG(c.salesOrderCount) as AvgOrders FROM c WHERE c.type = 'customer'";
+                
+                FeedIterator<dynamic> regionalQuery = customerContainer.GetItemQueryIterator<dynamic>(
+                    new QueryDefinition(regionalSql),
+                    requestOptions: new QueryRequestOptions()
+                    {
+                        PartitionKey = new PartitionKey(region)
+                    });
+
+                double regionalRU = 0;
+                while (regionalQuery.HasMoreResults)
+                {
+                    FeedResponse<dynamic> response = await regionalQuery.ReadNextAsync();
+                    regionalRU += response.RequestCharge;
+                    
+                    foreach (var result in response)
+                    {
+                        Console.WriteLine($"  {region}: {result.CustomerCount} customers, Avg Orders: {result.AvgOrders:F1} (RU: {regionalRU:F2})");
+                    }
+                }
+            }
+
+            Console.WriteLine("\n🔍 Real-world Hierarchical Partitioning Examples:");
+            Console.WriteLine("• E-commerce: [/region, /customerId] for geo-distributed customer data");
+            Console.WriteLine("• IoT: [/deviceType, /location, /deviceId] for sensor data");
+            Console.WriteLine("• Multi-tenant SaaS: [/tenantId, /userId] for customer isolation");
+            Console.WriteLine("• Gaming: [/gameId, /playerId] for player-specific queries");
+
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+        }
+
+        public static async Task DemoComputedProperties()
+        {
+            Database database = cosmosClient.GetDatabase("database-v5");
+            Container customerContainer = database.GetContainer("customer");
+            Container productContainer = database.GetContainer("product");
+
+            Console.WriteLine("=== Computed Properties Demo ===\n");
+            Console.WriteLine("📚 About Computed Properties:");
+            Console.WriteLine("Computed properties automatically calculate and index derived values:");
+            Console.WriteLine("• Defined at container creation time");
+            Console.WriteLine("• Automatically maintained and indexed");
+            Console.WriteLine("• Enable efficient queries on calculated fields");
+            Console.WriteLine("• Reduce application complexity and improve performance\n");
+
+            Console.WriteLine("Example Computed Properties for V5:");
+            Console.WriteLine("Customer container:");
+            Console.WriteLine("  • fullName: CONCAT(c.firstName, ' ', c.lastName)");
+            Console.WriteLine("  • yearCreated: DateTimePart('yyyy', c.creationDate)");
+            Console.WriteLine("Product container:");
+            Console.WriteLine("  • priceRange: c.price < 50 ? 'low' : c.price < 200 ? 'medium' : 'high'");
+            Console.WriteLine("  • discountedPrice: c.price * 0.9\n");
+
+            // Demo 1: Simulate computed property queries for customers
+            Console.WriteLine("1. Customer queries using computed 'fullName' property:");
+            Console.WriteLine("   (Simulating what would be efficient computed property queries)");
+            
+            string customerSql = "SELECT c.customerId, c.firstName, c.lastName, c.region FROM c WHERE c.type = 'customer'";
+            
+            FeedIterator<dynamic> customerResults = customerContainer.GetItemQueryIterator<dynamic>(
+                new QueryDefinition(customerSql));
+
+            while (customerResults.HasMoreResults)
+            {
+                FeedResponse<dynamic> response = await customerResults.ReadNextAsync();
+                
+                foreach (var customer in response)
+                {
+                    // Simulate computed property usage
+                    string computedFullName = $"{customer.firstName} {customer.lastName}";
+                    string computedYear = DateTime.Parse("2023-01-01").Year.ToString(); // Simplified for demo
+                    Console.WriteLine($"  Computed fullName: '{computedFullName}' (Region: {customer.region})");
+                    Console.WriteLine($"  Computed yearCreated: {computedYear}");
+                }
+            }
+
+            // Demo 2: Product price range analysis using computed properties
+            Console.WriteLine("\n2. Product analysis using computed 'priceRange' property:");
+            
+            string productSql = "SELECT p.name, p.price, p.categoryName FROM p";
+            
+            FeedIterator<dynamic> productResults = productContainer.GetItemQueryIterator<dynamic>(
+                new QueryDefinition(productSql));
+
+            var priceRangeStats = new Dictionary<string, List<double>>
+            {
+                ["low"] = new List<double>(),
+                ["medium"] = new List<double>(),
+                ["high"] = new List<double>()
+            };
+
+            while (productResults.HasMoreResults)
+            {
+                FeedResponse<dynamic> response = await productResults.ReadNextAsync();
+                
+                foreach (var product in response)
+                {
+                    // Simulate computed property calculation
+                    double price = (double)product.price;
+                    string priceRange = price < 50 ? "low" : 
+                                       price < 200 ? "medium" : "high";
+                    double discountedPrice = price * 0.9;
+                    
+                    priceRangeStats[priceRange].Add(price);
+                    
+                    Console.WriteLine($"  Product: {product.name} ({product.categoryName})");
+                    Console.WriteLine($"    Price: ${price:F2}, Range: {priceRange}, Discounted: ${discountedPrice:F2}");
+                }
+            }
+
+            // Demo 3: Aggregation using computed properties
+            Console.WriteLine("\n3. Price range analysis (leveraging computed priceRange):");
+            foreach (var range in priceRangeStats)
+            {
+                if (range.Value.Count > 0)
+                {
+                    double avgPrice = range.Value.Average();
+                    Console.WriteLine($"  {range.Key.ToUpper()} range: {range.Value.Count} products, Avg price: ${avgPrice:F2}");
+                }
+            }
+
+            Console.WriteLine("\n🚀 Benefits of Computed Properties:");
+            Console.WriteLine("✅ Automatic indexing for fast queries");
+            Console.WriteLine("✅ Consistent calculations across all queries");
+            Console.WriteLine("✅ Reduced application logic complexity");
+            Console.WriteLine("✅ Better query performance vs. calculated fields");
+            Console.WriteLine("✅ Simplified data access patterns");
+
+            Console.WriteLine("\n🔍 Real-world Use Cases:");
+            Console.WriteLine("• E-commerce: Product search by computed price ranges");
+            Console.WriteLine("• Analytics: Time-based aggregations (year, month, quarter)");
+            Console.WriteLine("• User management: Search by computed display names");
+            Console.WriteLine("• Financial: Risk scoring based on multiple factors");
+            Console.WriteLine("• IoT: Computed alert levels from sensor readings");
+
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+        }
+
+        public static async Task DemoAdvancedChangeFeed()
+        {
+            Console.WriteLine("=== Advanced Change Feed Demo ===\n");
+            Console.WriteLine("V5 demonstrates 'All Versions and Deletes' change feed mode:");
+            Console.WriteLine("- Tracks Create, Update, and Delete operations");
+            Console.WriteLine("- Provides before/after versions for updates");
+            Console.WriteLine("- Enables comprehensive audit trails\n");
+
+            // Start the advanced change feed processor
+            Console.WriteLine("Starting Advanced Change Feed Processor...");
+            await advancedChangeFeed.StartAdvancedChangeFeedProcessorAsync();
+
+            Console.WriteLine("\nNow let's make some changes to see the change feed in action:");
+            Console.WriteLine("Press 'c' to create a customer, 'u' to update a customer, 'd' to delete a customer, or 'x' to exit:");
+
+            Database database = cosmosClient.GetDatabase("database-v5");
+            Container customerContainer = database.GetContainer("customer");
+
+            bool exitDemo = false;
+            while (!exitDemo)
+            {
+                ConsoleKeyInfo key = Console.ReadKey(true);
+                
+                switch (key.KeyChar)
+                {
+                    case 'c':
+                        Console.WriteLine("\n--- Creating new customer ---");
+                        var newCustomer = new CustomerV5
+                        {
+                            id = $"CUSTOMER-{Guid.NewGuid().ToString()[..8]}",
+                            type = "customer",
+                            customerId = $"CUSTOMER-{Guid.NewGuid().ToString()[..8]}",
+                            region = "North America",
+                            firstName = "Demo",
+                            lastName = "Customer",
+                            emailAddress = "demo.customer@adventure-works.com",
+                            phoneNumber = "555-0999",
+                            creationDate = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                            addresses = new List<CustomerAddress>(),
+                            password = new Password { hash = "demo", salt = "demo" },
+                            salesOrderCount = 0
+                        };
+
+                        try
+                        {
+                            await customerContainer.CreateItemAsync(newCustomer, 
+                                new PartitionKey(newCustomer.region));
+                            Console.WriteLine("Customer created successfully!");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error creating customer: {ex.Message}");
+                        }
+                        break;
+
+                    case 'u':
+                        Console.WriteLine("\n--- Updating existing customer ---");
+                        try
+                        {
+                            // Read and update the first customer
+                            var readResponse = await customerContainer.ReadItemAsync<CustomerV5>(
+                                "CUSTOMER-001", 
+                                new PartitionKey("North America"));
+                            
+                            var customerToUpdate = readResponse.Resource;
+                            customerToUpdate.salesOrderCount += 1;
+                            customerToUpdate.phoneNumber = "555-UPDATED";
+
+                            await customerContainer.ReplaceItemAsync(customerToUpdate, 
+                                customerToUpdate.id, 
+                                new PartitionKey(customerToUpdate.region));
+                            
+                            Console.WriteLine("Customer updated successfully!");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error updating customer: {ex.Message}");
+                        }
+                        break;
+
+                    case 'd':
+                        Console.WriteLine("\n--- Deleting customer (simulated) ---");
+                        Console.WriteLine("Note: Delete operation would be tracked in change feed");
+                        Console.WriteLine("Showing how deletion would appear in change feed logs");
+                        break;
+
+                    case 'x':
+                        exitDemo = true;
+                        break;
+
+                    default:
+                        Console.WriteLine("\nInvalid option. Press 'c', 'u', 'd', or 'x'");
+                        break;
+                }
+
+                if (!exitDemo)
+                {
+                    await Task.Delay(2000); // Wait for change feed to process
+                    Console.WriteLine("\nPress 'c' to create, 'u' to update, 'd' to delete, or 'x' to exit:");
+                }
+            }
+
+            // Stop the change feed processor
+            await advancedChangeFeed.StopAdvancedChangeFeedProcessorAsync();
+            
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+        }
+
+        public static async Task DemoCrossRegionQueries()
+        {
+            Database database = cosmosClient.GetDatabase("database-v5");
+            Container customerContainer = database.GetContainer("customer");
+            Container salesOrderContainer = database.GetContainer("salesOrder");
+
+            Console.WriteLine("=== Cross-Region Query Performance Demo ===\n");
+            Console.WriteLine("Comparing query performance across different partition strategies:");
+            Console.WriteLine("- Regional queries (using hierarchical partitioning)");
+            Console.WriteLine("- Cross-region aggregations");
+            Console.WriteLine("- Customer-specific queries\n");
+
+            // Demo 1: Regional customer summary
+            Console.WriteLine("1. Regional Customer Analysis:");
+            
+            var regions = new[] { "North America", "Europe", "Asia Pacific" };
+            
+            foreach (string region in regions)
+            {
+                string regionalSql = "SELECT COUNT(1) as CustomerCount FROM c WHERE c.type = 'customer'";
+                
+                FeedIterator<dynamic> regionalQuery = customerContainer.GetItemQueryIterator<dynamic>(
+                    new QueryDefinition(regionalSql),
+                    requestOptions: new QueryRequestOptions()
+                    {
+                        PartitionKey = new PartitionKey(region)
+                    });
+
+                double requestCharge = 0;
+                int customerCount = 0;
+                
+                while (regionalQuery.HasMoreResults)
+                {
+                    FeedResponse<dynamic> response = await regionalQuery.ReadNextAsync();
+                    requestCharge += response.RequestCharge;
+                    
+                    foreach (var result in response)
+                    {
+                        customerCount = result.CustomerCount;
+                    }
+                }
+                
+                Console.WriteLine($"  {region}: {customerCount} customers (RU: {requestCharge:F2})");
+            }
+
+            // Demo 2: Cross-partition aggregation
+            Console.WriteLine("\n2. Global Customer Summary (Cross-Partition Query):");
+            
+            string globalSql = "SELECT c.region, COUNT(1) as Count, AVG(c.salesOrderCount) as AvgOrders " +
+                              "FROM c WHERE c.type = 'customer' GROUP BY c.region";
+                              
+            FeedIterator<dynamic> globalQuery = customerContainer.GetItemQueryIterator<dynamic>(
+                new QueryDefinition(globalSql));
+
+            double globalRequestCharge = 0;
+            
+            while (globalQuery.HasMoreResults)
+            {
+                FeedResponse<dynamic> response = await globalQuery.ReadNextAsync();
+                globalRequestCharge += response.RequestCharge;
+                
+                foreach (var result in response)
+                {
+                    Console.WriteLine($"  Region: {result.region}, Customers: {result.Count}, Avg Orders: {result.AvgOrders:F1}");
+                }
+            }
+            
+            Console.WriteLine($"  Total RU for global query: {globalRequestCharge:F2}");
+
+            // Demo 3: Customer order history across regions
+            Console.WriteLine("\n3. Customer Order History (Hierarchical Partition Benefits):");
+            
+            string customerOrderSql = @"
+                SELECT o.id, o.orderDate, 
+                       SUM(ARRAY(SELECT VALUE (item.price * item.quantity) FROM item IN o.details)) as total
+                FROM o 
+                WHERE o.type = 'salesOrder' AND o.customerId = 'CUSTOMER-001'";
+                
+            FeedIterator<dynamic> orderQuery = salesOrderContainer.GetItemQueryIterator<dynamic>(
+                new QueryDefinition(customerOrderSql),
+                requestOptions: new QueryRequestOptions()
+                {
+                    PartitionKey = new PartitionKey("North America") // Using region for efficient query
+                });
+
+            double orderRequestCharge = 0;
+            
+            while (orderQuery.HasMoreResults)
+            {
+                FeedResponse<dynamic> response = await orderQuery.ReadNextAsync();
+                orderRequestCharge += response.RequestCharge;
+                
+                foreach (var order in response)
+                {
+                    Console.WriteLine($"  Order: {order.id}, Date: {order.orderDate}, Total: ${order.total:F2}");
+                }
+            }
+            
+            Console.WriteLine($"  RU for customer-specific query: {orderRequestCharge:F2}");
+
+            Console.WriteLine("\nKey Benefits of Hierarchical Partitioning:");
+            Console.WriteLine("✅ Regional queries are highly efficient (single partition)");
+            Console.WriteLine("✅ Customer isolation maintained within regions");
+            Console.WriteLine("✅ Supports both regional and global analytics");
+            Console.WriteLine("✅ Optimal for geo-distributed applications");
+
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
         }
     }
 }

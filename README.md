@@ -125,9 +125,34 @@ The deployment will automatically:
 
 ## Source Data
 
-The sample data represents 4 versions of the Cosmos DB databases as they progress through the migration from a relational database to a highly scalable NoSQL database:
+The sample data represents 5 versions of the Cosmos DB databases as they progress through the migration from a relational database to a highly scalable NoSQL database leveraging the latest advanced features:
 
-* [Cosmic Works version 1](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v1)
-* [Cosmic Works version 2](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v2)
-* [Cosmic Works version 3](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v3)
-* [Cosmic Works version 4](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v4)
+* [Cosmic Works version 1](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v1) - Relational-style normalized data model
+* [Cosmic Works version 2](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v2) - Basic denormalization with optimized partition keys
+* [Cosmic Works version 3](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v3) - Advanced denormalization with embedded categories
+* [Cosmic Works version 4](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v4) - Complete denormalization with customers and orders co-located
+* [Cosmic Works version 5](https://github.com/AzureCosmosDB/CosmicWorks/tree/main/data/database-v5) - **NEW**: Advanced features including hierarchical partitioning, computed properties, and enhanced change feed
+
+## New in V5: Advanced Cosmos DB Features
+
+Version 5 demonstrates the latest Azure Cosmos DB capabilities for modern NoSQL applications:
+
+### 🚀 Featured Capabilities
+- **Hierarchical Partitioning**: Multi-level partition keys for better data distribution and query performance
+- **Global Secondary Indexes**: Alternative access patterns without data duplication  
+- **Computed Properties**: Automatic calculation and indexing of derived fields
+- **All Versions and Deletes Change Feed**: Comprehensive operation tracking with before/after states
+
+### 🎯 Interactive Demos
+- **[l]** Hierarchical Partitioning - Regional data distribution strategies
+- **[m]** Computed Properties - Calculated field indexing and querying
+- **[n]** Advanced Change Feed - Comprehensive change tracking with business rules
+- **[o]** Cross-region Queries - Performance comparisons across partition strategies
+
+### 📚 Learning Resources
+- [V5 Features Documentation](./docs/V5-FEATURES.md) - Detailed guide to new capabilities
+- Real-world use case examples and migration guidance
+- Performance optimization recommendations
+- Best practices for advanced NoSQL data modeling
+
+Perfect for developers transitioning from relational databases to modern NoSQL architectures, or those looking to leverage the latest Cosmos DB innovations for high-performance, globally distributed applications.
