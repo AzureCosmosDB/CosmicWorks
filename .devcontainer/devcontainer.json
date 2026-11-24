@@ -1,6 +1,6 @@
 {
   "name": "CosmicWorks Development Container",
-  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:10.0",
   "features": {
     "ghcr.io/devcontainers/features/azure-cli:1": {
       "version": "latest",
