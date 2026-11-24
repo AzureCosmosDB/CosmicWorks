@@ -1,13 +1,13 @@
 # CosmicWorks - Azure Cosmos DB Data Modeling Demos
 
-CosmicWorks is a .NET 9 console application demonstrating the evolution of data models from relational to NoSQL using Azure Cosmos DB. The application shows four progressive database schema versions (v1-v4) with interactive demos.
+CosmicWorks is a .NET 10 console application demonstrating the evolution of data models from relational to NoSQL using Azure Cosmos DB. The application shows four progressive database schema versions (v1-v4) with interactive demos.
 
 **ALWAYS reference these instructions first and fallback to search or terminal commands only when you encounter unexpected information that does not match the info here.**
 
 ## Working Effectively
 
 ### Prerequisites and Setup
-- Install .NET 9 SDK: https://dotnet.microsoft.com/download/dotnet/9.0
+- Install .NET 10 SDK: https://dotnet.microsoft.com/download/dotnet/10.0
 - Install Azure CLI: `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash`
 - Install Azure Developer CLI (AZD): `curl -fsSL https://aka.ms/install-azd.sh | bash`
 
@@ -24,7 +24,7 @@ CosmicWorks is a .NET 9 console application demonstrating the evolution of data 
 ### Deployment Options (Choose One)
 
 #### Option 0: VS Code Dev Containers
-- Repo includes a Dev Container config at `.devcontainer/devcontainer.json` (base image: `mcr.microsoft.com/devcontainers/dotnet:9.0`).
+- Repo includes a Dev Container config at `.devcontainer/devcontainer.json` (base image: `mcr.microsoft.com/devcontainers/dotnet:10.0`).
 - Dev Containers requires Docker (Docker Desktop on Windows/macOS; Docker Engine on Linux) and the VS Code Dev Containers extension.
 
 #### Option 1: Azure Developer CLI (AZD) - RECOMMENDED
@@ -98,7 +98,7 @@ After making any changes, ALWAYS run through this complete validation scenario:
 ## Key Projects and File Structure
 
 ### Primary Project
-- **`src/CosmicWorks.csproj`**: Main .NET 9 console application
+- **`src/CosmicWorks.csproj`**: Main .NET 10 console application
 - **`src/Program.cs`**: Application entry point and interactive menu system
 - **`src/Models.cs`**: Data models for different schema versions
 - **`src/Dataload.cs`**: Data loading functionality from GitHub
@@ -146,4 +146,4 @@ After making any changes, ALWAYS run through this complete validation scenario:
 - **"appsettings.development.json not found"**: Run `azd up` to deploy Azure resources
 - **Authentication errors**: Ensure `azd auth login` was completed successfully  
 - **Data loading timeouts**: Be patient, loading can take 15+ minutes on slow connections
-- **Build failures**: Ensure .NET 9 SDK is installed and try `dotnet clean` first
+- **Build failures**: Ensure .NET 10 SDK is installed and try `dotnet clean` first

@@ -59,7 +59,7 @@ No matter which method you choose, you will need to **[Deploy to Azure (AZD)](#d
 **Prerequisites**
 
 1. [Visual Studio Code](https://code.visualstudio.com/) (or another IDE/editor)
-1. [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+1. [.NET 10 SDK (LTS)](https://dotnet.microsoft.com/download/dotnet/10.0)
 1. [Azure Developer CLI (AZD)](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview)
 1. An Azure subscription with permission to create resources
 
